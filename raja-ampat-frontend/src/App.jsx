@@ -1,24 +1,33 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+// Import halaman Admin
+import AdminLogin from './pages/admin/AdminLogin';
+import Dashboard from './pages/admin/Dashboard'; 
+import ManagePackages from './pages/admin/ManagePackages'; 
+import ManageBookings from './pages/admin/ManageBookings';
+import ManageBlog from './pages/admin/ManageBlog';
+import ManageDestinations from './pages/admin/ManageDestinations'; 
+import ManageReviews from './pages/admin/ManageReviews';
+
 function App() {
   return (
     <Router>
-      <div>
-        {/* Nanti Navbar kita taruh di sini */}
+      <Routes>
+        {/* Rute untuk halaman Login Admin */}
+        <Route path="/admin/login" element={<AdminLogin />} />
         
-        <Routes>
-          <Route path="/" element={<h1>Halaman Home (Beranda)</h1>} />
-          <Route path="/destinations" element={<h1>Halaman Destinasi</h1>} />
-          <Route path="/packages" element={<h1>Halaman Paket Tour</h1>} />
-          <Route path="/packages/:id" element={<h1>Halaman Detail Paket</h1>} />
-          <Route path="/booking" element={<h1>Halaman Booking</h1>} />
-          <Route path="/gallery" element={<h1>Halaman Galeri</h1>} />
-          <Route path="/blog" element={<h1>Halaman Blog</h1>} />
-          <Route path="/contact" element={<h1>Halaman Kontak</h1>} />
-        </Routes>
-
-        {/* Nanti Footer kita taruh di sini */}
-      </div>
+        {/* Rute untuk halaman Pusat Kendali */}
+        <Route path="/admin/dashboard" element={<Dashboard />} />
+        <Route path="/admin/bookings" element={<ManageBookings />} />
+        <Route path="/admin/packages" element={<ManagePackages />} />
+        <Route path="/admin/destinations" element={<ManageDestinations />} />
+        <Route path="/admin/blog" element={<ManageBlog />} />
+        <Route path="/admin/reviews" element={<ManageReviews />} />
+        {/* Rute yang belum dibuat (bisa ditambahkan nanti) */}
+        {/* <Route path="/admin/gallery" element={<ManageGallery />} /> */}
+        {/* <Route path="/admin/inbox" element={<ContactInbox />} /> */}
+        {/* <Route path="/admin/users" element={<ManageUsers />} /> */}
+      </Routes>
     </Router>
   );
 }

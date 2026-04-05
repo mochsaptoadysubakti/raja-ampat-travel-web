@@ -1,9 +1,10 @@
-// routes/destinationRoutes.js
 const express = require('express');
 const router = express.Router();
-const { getDestinations, getSingleDestination } = require('../controllers/destinationController');
+const { getDestinations, addDestination, updateDestination, deleteDestination } = require('../controllers/destinationController');
 
 router.get('/', getDestinations);
-router.get('/:id', getSingleDestination);
+router.post('/', addDestination);
+router.put('/:id', updateDestination);
+router.delete('/:id', deleteDestination);
 
 module.exports = router;

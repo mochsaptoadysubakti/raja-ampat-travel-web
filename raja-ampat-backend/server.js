@@ -4,7 +4,7 @@ require('dotenv').config();
 
 // Mengimpor semua routes
 const destinationRoutes = require('./routes/destinationRoutes');
-const tourPackageRoutes = require('./routes/tourPackageRoutes');
+const tourPackageRoutes = require('./routes/tourPackageRoutes'); // File routes yang kita edit tadi
 const userRoutes = require('./routes/userRoutes');
 const itineraryRoutes = require('./routes/itineraryRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
@@ -20,23 +20,23 @@ app.use(cors());
 app.use(express.json()); // Agar bisa menerima request body berupa JSON
 
 // --- FITUR DEBUGGER ANTI-CRASH ---
-// Fungsi ini akan mengecek apakah file route valid atau kosong
 const safeRoute = (routeName, routeModule) => {
-    // Di Express, sebuah router yang valid harus terdeteksi sebagai 'function'
     if (typeof routeModule !== 'function') {
         console.log(`\n❌ ERROR DITEMUKAN PADA: ${routeName}`);
         console.log(`   Penyebab: File di dalam folder 'routes' ini kemungkinan masih kosong,`);
         console.log(`   atau kamu lupa menambahkan "module.exports = router;" di baris paling bawah.`);
-        // Mengembalikan router kosong sementara agar server tidak langsung crash/mati
         return express.Router(); 
     }
     return routeModule;
 };
 // ---------------------------------
 
-// Mendaftarkan Routes API dengan fitur pengecekan aman
+// Mendaftarkan Routes API
 app.use('/api/destinations', safeRoute('destinationRoutes', destinationRoutes));
-app.use('/api/tour-packages', safeRoute('tourPackageRoutes', tourPackageRoutes));
+
+// SINKRONISASI: Kita pakai underscore '_' agar cocok dengan pemanggilan di React (ManagePackages.jsx)
+app.use('/api/tour_packages', safeRoute('tourPackageRoutes', tourPackageRoutes));
+
 app.use('/api/users', safeRoute('userRoutes', userRoutes));
 app.use('/api/itinerary', safeRoute('itineraryRoutes', itineraryRoutes));
 app.use('/api/bookings', safeRoute('bookingRoutes', bookingRoutes));

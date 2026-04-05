@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getPackageReviews } = require('../controllers/reviewController');
+const { getReviews, addReview, deleteReview } = require('../controllers/reviewController');
 
-// Mengambil review berdasarkan ID paket wisata
-router.get('/package/:packageId', getPackageReviews);
+router.get('/', getReviews);
+router.post('/', addReview);
+router.delete('/:id', deleteReview);
 
 module.exports = router;

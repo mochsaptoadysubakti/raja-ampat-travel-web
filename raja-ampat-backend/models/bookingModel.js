@@ -1,21 +1,24 @@
 const pool = require('../config/db');
 
-const createBooking = async (user_id, package_id, booking_date, total_people, total_price) => {
+const getAllBookings = async () => {
+    // Mengambil semua data booking, diurutkan dari yang terbaru
+    // Catatan: Jika tidak ada kolom 'id', ubah ORDER BY sesuai nama kolom primary key-mu
+    const result = await pool.query('SELECT * FROM bookings ORDER BY id DESC');
+    return result.rows;
+};
+
+const updateStatus = async (id, status) => {
+    // Fungsi untuk mengubah status pesanan (misal: pending -> confirmed)
     const result = await pool.query(
-        'INSERT INTO bookings (user_id, package_id, booking_date, total_people, total_price) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [user_id, package_id, booking_date, total_people, total_price]
+        'UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *',
+        [status, id]
     );
     return result.rows[0];
 };
 
-const getUserBookings = async (user_id) => {
-    const result = await pool.query(`
-        SELECT b.*, t.title AS package_title 
-        FROM bookings b
-        JOIN tour_packages t ON b.package_id = t.id
-        WHERE b.user_id = $1 ORDER BY b.booking_date DESC
-    `, [user_id]);
-    return result.rows;
+const deleteBooking = async (id) => {
+    const result = await pool.query('DELETE FROM bookings WHERE id = $1 RETURNING *', [id]);
+    return result.rows[0];
 };
 
-module.exports = { createBooking, getUserBookings };
+module.exports = { getAllBookings, updateStatus, deleteBooking };
