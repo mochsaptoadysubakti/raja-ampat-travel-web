@@ -1,9 +1,16 @@
-// routes/tourPackageRoutes.js
 const express = require('express');
 const router = express.Router();
-const { getPackages, getSinglePackage } = require('../controllers/tourPackageController');
+const { 
+    getPackages, 
+    addPackage, 
+    updatePackage, 
+    deletePackage 
+} = require('../controllers/tourPackageController');
 
+// Pastikan handler (getPackages, dll) bukan undefined
 router.get('/', getPackages);
-router.get('/:id', getSinglePackage);
+router.post('/', addPackage);
+router.put('/:id', updatePackage);
+router.delete('/:id', deletePackage);
 
 module.exports = router;

@@ -1,22 +1,33 @@
 const Booking = require('../models/bookingModel');
 
-const createNewBooking = async (req, res) => {
-    const { user_id, package_id, booking_date, total_people, total_price } = req.body;
+const getBookings = async (req, res) => {
     try {
-        const newBooking = await Booking.createBooking(user_id, package_id, booking_date, total_people, total_price);
-        res.status(201).json({ message: "Booking successful", booking: newBooking });
+        const bookings = await Booking.getAllBookings();
+        res.status(200).json({ data: bookings });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-const getBookingsByUser = async (req, res) => {
+const updateBookingStatus = async (req, res) => {
+    const { status } = req.body;
     try {
-        const bookings = await Booking.getUserBookings(req.params.userId);
-        res.status(200).json(bookings);
+        const updatedBooking = await Booking.updateStatus(req.params.id, status);
+        if (!updatedBooking) return res.status(404).json({ message: "Booking tidak ditemukan" });
+        res.status(200).json({ status: "success", data: updatedBooking, message: "Status berhasil diubah!" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-module.exports = { createNewBooking, getBookingsByUser };
+const deleteBooking = async (req, res) => {
+    try {
+        const deletedBooking = await Booking.deleteBooking(req.params.id);
+        if (!deletedBooking) return res.status(404).json({ message: "Booking tidak ditemukan" });
+        res.status(200).json({ status: "success", message: "Booking berhasil dihapus!" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getBookings, updateBookingStatus, deleteBooking };
