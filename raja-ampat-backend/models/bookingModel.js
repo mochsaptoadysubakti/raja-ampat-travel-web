@@ -1,14 +1,30 @@
 const pool = require('../config/db');
 
+// 1. Mengambil Semua Pesanan
 const getAllBookings = async () => {
-    // Mengambil semua data booking, diurutkan dari yang terbaru
-    // Catatan: Jika tidak ada kolom 'id', ubah ORDER BY sesuai nama kolom primary key-mu
-    const result = await pool.query('SELECT * FROM bookings ORDER BY id DESC');
+    const result = await pool.query(`
+        SELECT b.id, u.name AS user_name, p.title AS package_name, 
+               b.booking_date, b.total_people, b.total_price, b.status 
+        FROM bookings b
+        JOIN users u ON b.user_id = u.id
+        JOIN tour_packages p ON b.package_id = p.id
+        ORDER BY b.id DESC
+    `);
     return result.rows;
 };
 
-const updateStatus = async (id, status) => {
-    // Fungsi untuk mengubah status pesanan (misal: pending -> confirmed)
+// 2. Membuat Pesanan Baru (POST)
+const createBooking = async (userId, packageId, bookingDate, totalPeople, totalPrice) => {
+    const result = await pool.query(
+        `INSERT INTO bookings (user_id, package_id, booking_date, total_people, total_price, status) 
+         VALUES ($1, $2, $3, $4, $5, 'pending') RETURNING *`,
+        [userId, packageId, bookingDate, totalPeople, totalPrice]
+    );
+    return result.rows[0];
+};
+
+// 3. Mengubah Status Pesanan (PUT)
+const updateBookingStatus = async (id, status) => {
     const result = await pool.query(
         'UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *',
         [status, id]
@@ -16,9 +32,8 @@ const updateStatus = async (id, status) => {
     return result.rows[0];
 };
 
-const deleteBooking = async (id) => {
-    const result = await pool.query('DELETE FROM bookings WHERE id = $1 RETURNING *', [id]);
-    return result.rows[0];
+module.exports = {
+    getAllBookings,
+    createBooking,
+    updateBookingStatus
 };
-
-module.exports = { getAllBookings, updateStatus, deleteBooking };

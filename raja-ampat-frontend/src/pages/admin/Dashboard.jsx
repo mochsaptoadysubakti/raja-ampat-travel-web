@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import Sidebar from '../../components/admin/Sidebar'; // <-- Import Sidebar yang baru
+import Sidebar from '../../components/admin/Sidebar';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -29,17 +29,17 @@ const Dashboard = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
       let countPackages = 0;
-      let countBlogs = 0; // Siapkan variabel untuk menghitung blog
+      let countBlogs = 0; 
+      let countBookings = 0;
+      let countGallery = 0; // Variabel penampung Galeri
+      let countInbox = 0;   // Variabel penampung Pesan Masuk
 
       // 1. Ambil Data Paket Tour
       try {
         const resPackages = await axios.get('http://localhost:5000/api/tour_packages', config);
         const dataPkg = resPackages.data;
-        if (Array.isArray(dataPkg)) {
-          countPackages = dataPkg.length;
-        } else if (dataPkg && Array.isArray(dataPkg.data)) {
-          countPackages = dataPkg.data.length;
-        }
+        if (Array.isArray(dataPkg)) countPackages = dataPkg.length;
+        else if (dataPkg && Array.isArray(dataPkg.data)) countPackages = dataPkg.data.length;
       } catch (error) {
         console.log("Belum bisa ambil paket tour:", error.message);
       }
@@ -48,22 +48,49 @@ const Dashboard = () => {
       try {
         const resBlogs = await axios.get('http://localhost:5000/api/blogs', config);
         const dataBlog = resBlogs.data;
-        if (Array.isArray(dataBlog)) {
-          countBlogs = dataBlog.length;
-        } else if (dataBlog && Array.isArray(dataBlog.data)) {
-          countBlogs = dataBlog.data.length;
-        }
+        if (Array.isArray(dataBlog)) countBlogs = dataBlog.length;
+        else if (dataBlog && Array.isArray(dataBlog.data)) countBlogs = dataBlog.data.length;
       } catch (error) {
         console.log("Belum bisa ambil artikel blog:", error.message);
       }
 
-      // Update State dengan angka yang berhasil didapat
+      // 3. Ambil Data Bookings 
+      try {
+        const resBookings = await axios.get('http://localhost:5000/api/bookings', config);
+        const dataBooking = resBookings.data;
+        if (Array.isArray(dataBooking)) countBookings = dataBooking.length;
+        else if (dataBooking && Array.isArray(dataBooking.data)) countBookings = dataBooking.data.length;
+      } catch (error) {
+        console.log("Belum bisa ambil data bookings:", error.message);
+      }
+
+      // 4. Ambil Data Galeri
+      try {
+        const resGallery = await axios.get('http://localhost:5000/api/gallery', config);
+        const dataGal = resGallery.data;
+        if (Array.isArray(dataGal)) countGallery = dataGal.length;
+        else if (dataGal && Array.isArray(dataGal.data)) countGallery = dataGal.data.length;
+      } catch (error) {
+        console.log("Belum bisa ambil data galeri:", error.message);
+      }
+
+      // 5. Ambil Data Pesan Masuk (Contact Inbox)
+      try {
+        const resInbox = await axios.get('http://localhost:5000/api/contacts', config);
+        const dataInb = resInbox.data;
+        if (Array.isArray(dataInb)) countInbox = dataInb.length;
+        else if (dataInb && Array.isArray(dataInb.data)) countInbox = dataInb.data.length;
+      } catch (error) {
+        console.log("Belum bisa ambil data pesan masuk:", error.message);
+      }
+
+      // Update SEMUA State dengan angka yang berhasil didapat
       setStats({
-        bookings: 0,             // Belum ada API (Segera kita buat!)
-        packages: countPackages, // Data paket tour
-        inbox: 0,                // Belum ada API
-        blogs: countBlogs,       // Data blog yang baru saja ditambahkan!
-        gallery: 0               // Belum ada API
+        bookings: countBookings,
+        packages: countPackages, 
+        inbox: countInbox,      
+        blogs: countBlogs,       
+        gallery: countGallery    
       });
 
       setIsLoading(false);
@@ -88,10 +115,8 @@ const Dashboard = () => {
       </style>
 
       <div>
-        {/* Panggil komponen Sidebar yang sudah dipisah, kode jadi jauh lebih bersih! */}
         <Sidebar />
 
-        {/* KONTEN UTAMA */}
         <main className="sneat-main">
           <nav className="sneat-navbar">
             <div className="d-flex align-items-center w-50">
@@ -123,7 +148,6 @@ const Dashboard = () => {
               </div>
 
               <div className="row">
-                {/* Bookings */}
                 <div className="col-lg-3 col-md-6 mb-4">
                   <div className="card sneat-card h-100 p-3">
                     <div className="d-flex justify-content-between align-items-start">
@@ -133,7 +157,6 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Packages */}
                 <div className="col-lg-3 col-md-6 mb-4">
                   <div className="card sneat-card h-100 p-3">
                     <div className="d-flex justify-content-between align-items-start">
@@ -143,7 +166,6 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Blog */}
                 <div className="col-lg-3 col-md-6 mb-4">
                   <div className="card sneat-card h-100 p-3">
                     <div className="d-flex justify-content-between align-items-start">
@@ -153,7 +175,6 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Gallery */}
                 <div className="col-lg-3 col-md-6 mb-4">
                   <div className="card sneat-card h-100 p-3">
                     <div className="d-flex justify-content-between align-items-start">
@@ -163,7 +184,6 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Inbox Messages */}
                 <div className="col-lg-3 col-md-6 mb-4">
                   <div className="card sneat-card h-100 p-3">
                     <div className="d-flex justify-content-between align-items-start">

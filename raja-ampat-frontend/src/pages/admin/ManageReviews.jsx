@@ -25,19 +25,18 @@ const ManageReviews = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // 1. Ambil data Reviews
+      // 1. Ambil data Reviews (PERBAIKAN: Hapus .data ekstra)
       const resReviews = await axios.get('http://localhost:5000/api/reviews', config);
-      setReviews(resReviews.data.data || []);
+      setReviews(Array.isArray(resReviews.data) ? resReviews.data : (resReviews.data.data || []));
 
       // 2. Ambil data Paket Tour (untuk Dropdown)
       const resPackages = await axios.get('http://localhost:5000/api/tour_packages', config);
-      setPackages(resPackages.data.data || []);
+      setPackages(Array.isArray(resPackages.data) ? resPackages.data : (resPackages.data.data || []));
 
       // 3. Ambil data Users (untuk Dropdown)
-      // Pastikan backend kamu sudah punya route untuk '/api/users' ya!
       try {
         const resUsers = await axios.get('http://localhost:5000/api/users', config);
-        setUsers(resUsers.data.data || []);
+        setUsers(Array.isArray(resUsers.data) ? resUsers.data : (resUsers.data.data || []));
       } catch (userErr) {
         console.warn("API Users belum tersedia atau gagal dimuat.", userErr);
       }
@@ -62,7 +61,7 @@ const ManageReviews = () => {
       resetForm();
       fetchData(); // Refresh semua data
     } catch (error) {
-      alert(`Gagal menyimpan: ${error.response?.data?.message || error.message}`);
+      alert(`Gagal menyimpan: ${error.response?.data?.error || error.message}`);
     }
   };
 
@@ -225,8 +224,9 @@ const ManageReviews = () => {
                   ) : (
                     reviews.map((review) => (
                       <tr key={review.id}>
+                        {/* PERBAIKAN: Ganti customer_name menjadi user_name */}
                         <td className="ps-4 fw-bold" style={{ color: theme.primary }}>
-                          {review.customer_name || `User ID: ${review.user_id}`}
+                          {review.user_name || `User ID: ${review.user_id}`}
                         </td>
                         <td><span className="badge bg-light text-dark border px-2 py-1">{review.package_name || `Paket ID: ${review.package_id}`}</span></td>
                         <td>{renderStars(review.rating)}</td>

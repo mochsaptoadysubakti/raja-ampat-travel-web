@@ -20,7 +20,8 @@ const ManageBookings = () => {
     setIsLoading(true);
     try {
       const response = await axios.get('http://localhost:5000/api/bookings', config);
-      const fetchedData = response.data.data || [];
+      // PERBAIKAN 1: Hapus .data ekstra karena backend langsung me-return array
+      const fetchedData = response.data; 
       setBookings(Array.isArray(fetchedData) ? fetchedData : []);
     } catch (error) {
       console.error("Gagal mengambil data bookings", error);
@@ -41,7 +42,7 @@ const ManageBookings = () => {
       // Update state lokal agar tabel langsung berubah tanpa perlu refresh
       setBookings(bookings.map(b => b.id === id ? { ...b, status: newStatus } : b));
     } catch (error) {
-      alert("Gagal merubah status: " + (error.response?.data?.message || error.message));
+      alert("Gagal merubah status: " + (error.response?.data?.error || error.message));
     }
   };
 
@@ -120,7 +121,7 @@ const ManageBookings = () => {
                   <tr>
                     <th className="ps-4">ID</th>
                     <th>Nama Pelanggan</th>
-                    <th>ID Paket / Layanan</th>
+                    <th>Nama Paket</th>
                     <th>Total Harga</th>
                     <th>Status</th>
                     <th className="text-center pe-4">Aksi</th>
@@ -135,9 +136,11 @@ const ManageBookings = () => {
                     bookings.map((booking) => (
                       <tr key={booking.id}>
                         <td className="ps-4 fw-bold">#{booking.id}</td>
-                        {/* Sesuaikan nama properti (customer_name, package_id, dll) dengan kolom di PostgreSQL kamu! */}
-                        <td className="fw-bold" style={{ color: theme.primary }}>{booking.customer_name || 'Tanpa Nama'}</td>
-                        <td>{booking.package_id || '-'}</td>
+                        
+                        {/* PERBAIKAN 2: Sesuaikan nama variabel dengan output SQL Backend */}
+                        <td className="fw-bold" style={{ color: theme.primary }}>{booking.user_name || 'Tanpa Nama'}</td>
+                        <td>{booking.package_name || '-'}</td>
+                        
                         <td className="fw-semibold">Rp {parseInt(booking.total_price || 0).toLocaleString('id-ID')}</td>
                         <td>
                           {/* Dropdown untuk mengubah status langsung dari tabel */}
