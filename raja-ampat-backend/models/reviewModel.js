@@ -1,31 +1,30 @@
 const pool = require('../config/db');
 
+// 1. Mengambil Semua Review (Untuk Admin / Halaman Depan)
 const getAllReviews = async () => {
-    // Menggunakan LEFT JOIN agar bisa mengambil nama user dan nama paket
-    const query = `
-        SELECT r.id, r.rating, r.comment, r.created_at, 
-               u.name AS customer_name, 
-               p.title AS package_name
+    const result = await pool.query(`
+        SELECT r.id, u.name AS user_name, p.title AS package_name, 
+               r.rating, r.comment, r.created_at 
         FROM reviews r
-        LEFT JOIN users u ON r.user_id = u.id
-        LEFT JOIN tour_packages p ON r.package_id = p.id
+        JOIN users u ON r.user_id = u.id
+        JOIN tour_packages p ON r.package_id = p.id
         ORDER BY r.id DESC
-    `;
-    const result = await pool.query(query);
+    `);
     return result.rows;
 };
 
-const createReview = async (user_id, package_id, rating, comment) => {
+// 2. Menambahkan Review Baru (POST)
+const addReview = async (userId, packageId, rating, comment) => {
+    // created_at biasanya terisi otomatis oleh PostgreSQL (default: NOW())
     const result = await pool.query(
-        'INSERT INTO reviews (user_id, package_id, rating, comment) VALUES ($1, $2, $3, $4) RETURNING *',
-        [user_id, package_id, rating, comment]
+        `INSERT INTO reviews (user_id, package_id, rating, comment) 
+         VALUES ($1, $2, $3, $4) RETURNING *`,
+        [userId, packageId, rating, comment]
     );
     return result.rows[0];
 };
 
-const deleteReview = async (id) => {
-    const result = await pool.query('DELETE FROM reviews WHERE id = $1 RETURNING *', [id]);
-    return result.rows[0];
+module.exports = {
+    getAllReviews,
+    addReview
 };
-
-module.exports = { getAllReviews, createReview, deleteReview };

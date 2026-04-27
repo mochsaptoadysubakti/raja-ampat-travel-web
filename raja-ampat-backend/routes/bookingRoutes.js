@@ -1,9 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { getBookings, updateBookingStatus, deleteBooking } = require('../controllers/bookingController');
 
-router.get('/', getBookings);
-router.put('/:id/status', updateBookingStatus); // Rute khusus ubah status
-router.delete('/:id', deleteBooking);
+// PERHATIKAN: Pastikan nama file di dalam require() sama persis huruf besar/kecilnya
+const { 
+    getAllBookings, 
+    createBooking, 
+    updateBookingStatus 
+} = require('../controllers/bookingController');
+
+// Mengambil semua data pemesanan
+router.get('/', getAllBookings);
+
+// Membuat pemesanan baru
+router.post('/', createBooking);
+
+// Mengupdate status pemesanan
+router.put('/:id/status', updateBookingStatus);
 
 module.exports = router;
