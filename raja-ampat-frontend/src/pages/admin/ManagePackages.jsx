@@ -13,9 +13,9 @@ const ManagePackages = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
-  // TAMBAHAN: is_available di state
+  // TAMBAHAN: State category ditambahkan ke formData
   const [formData, setFormData] = useState({
-    title: '', price: '', duration: '', image_url: '', description: '', is_available: true
+    title: '', price: '', duration: '', image_url: '', category: '', description: '', is_available: true, is_featured: false
   });
 
   const [itineraries, setItineraries] = useState([
@@ -70,8 +70,10 @@ const ManagePackages = () => {
         price: formData.price,
         duration: formData.duration,
         image_url: formData.image_url,
+        category: formData.category, // Kirim kategori ke backend
         description: formData.description,
-        is_available: formData.is_available, // TAMBAHAN: Kirim status ke backend
+        is_available: formData.is_available,
+        is_featured: formData.is_featured,
         itinerary: itineraries.map((it, index) => ({
           destination_id: it.destination_id ? parseInt(it.destination_id) : null, 
           day_number: index + 1,
@@ -98,9 +100,13 @@ const ManagePackages = () => {
       title: pkg.title, 
       price: pkg.price, 
       duration: pkg.duration, 
-      image_url: pkg.image_url || '',
+      image_url: pkg.image_url || pkg.image || '', // Menyesuaikan dengan nama kolom DB
+      category: pkg.category || pkg.kategori || '',
       description: pkg.description || '',
-      is_available: pkg.is_available !== false // Pastikan defaultnya true jika null
+      
+      // PERBAIKAN: Membaca format angka (1/0) atau string ("1"/"0", "true"/"false") dari Database
+      is_available: pkg.is_available === false || pkg.is_available === 0 || String(pkg.is_available) === "0" || String(pkg.is_available).toLowerCase() === "false" ? false : true,
+      is_featured: pkg.is_featured === true || pkg.is_featured === 1 || String(pkg.is_featured) === "1" || String(pkg.is_featured).toLowerCase() === "true" 
     });
 
     if (pkg.itinerary_details && pkg.itinerary_details.length > 0) {
@@ -136,7 +142,7 @@ const ManagePackages = () => {
   };
 
   const resetForm = () => {
-    setFormData({ title: '', price: '', duration: '', image_url: '', description: '', is_available: true });
+    setFormData({ title: '', price: '', duration: '', image_url: '', category: '', description: '', is_available: true, is_featured: false });
     setItineraries([{ destination_id: '', activity: '' }]);
     setEditingId(null);
     setShowForm(false);
@@ -194,25 +200,37 @@ const ManagePackages = () => {
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="form-label fw-semibold">Nama Paket</label>
-                    <input type="text" className="form-control form-control-sm" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required />
+                    <input type="text" className="form-control" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required />
                   </div>
                   <div className="col-md-3 mb-3">
                     <label className="form-label fw-semibold">Harga (Rp)</label>
-                    <input type="number" className="form-control form-control-sm" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
+                    <input type="number" className="form-control" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
                   </div>
                   <div className="col-md-3 mb-3">
                     <label className="form-label fw-semibold">Durasi</label>
-                    <input type="text" className="form-control form-control-sm" placeholder="3 Hari 2 Malam" value={formData.duration} onChange={(e) => setFormData({...formData, duration: e.target.value})} required />
+                    <input type="text" className="form-control" placeholder="3 Hari 2 Malam" value={formData.duration} onChange={(e) => setFormData({...formData, duration: e.target.value})} required />
                   </div>
                   
-                  <div className="col-md-8 mb-3">
-                    <label className="form-label fw-semibold">Link Foto Utama</label>
-                    <input type="url" className="form-control form-control-sm" value={formData.image_url} onChange={(e) => setFormData({...formData, image_url: e.target.value})} />
+                  {/* TAMBAHAN: Dropdown Kategori */}
+                  <div className="col-md-4 mb-3">
+                    <label className="form-label fw-semibold">Kategori Paket</label>
+                    <select className="form-select" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} required>
+                      <option value="">-- Pilih Kategori --</option>
+                      <option value="Diving">Diving</option>
+                      <option value="Bulan Madu">Bulan Madu</option>
+                      <option value="Keluarga">Keluarga</option>
+                      <option value="Healing Trip">Healing Trip</option>
+                      <option value="Adventure">Petualangan (Adventure)</option>
+                    </select>
                   </div>
 
-                  {/* TAMBAHAN: SAKLAR (SWITCH) STATUS KETERSEDIAAN */}
-                  <div className="col-md-4 mb-3 d-flex align-items-end">
-                    <div className="form-check form-switch fs-5 mb-1">
+                  <div className="col-md-8 mb-3">
+                    <label className="form-label fw-semibold">Link Foto Utama</label>
+                    <input type="url" className="form-control" value={formData.image_url} onChange={(e) => setFormData({...formData, image_url: e.target.value})} />
+                  </div>
+
+                  <div className="col-md-6 mb-3 d-flex align-items-end">
+                    <div className="form-check form-switch fs-6 mb-1 me-4">
                       <input 
                         className="form-check-input" 
                         type="checkbox" 
@@ -220,16 +238,36 @@ const ManagePackages = () => {
                         checked={formData.is_available} 
                         onChange={(e) => setFormData({...formData, is_available: e.target.checked})} 
                       />
-                      <label className="form-check-label fw-bold ms-2" htmlFor="statusSwitch" style={{ fontSize: '1rem' }}>
-                        {formData.is_available ? <span className="text-success">Tersedia</span> : <span className="text-danger">Tidak Tersedia</span>}
+                      <label className="form-check-label fw-bold ms-1" htmlFor="statusSwitch">
+                        {formData.is_available ? <span className="text-success">Tersedia</span> : <span className="text-danger">Tdk Tersedia</span>}
+                      </label>
+                    </div>
+                    <div className="form-check form-switch fs-6 mb-1">
+                      <input 
+                        className="form-check-input" 
+                        type="checkbox" 
+                        id="featuredSwitch" 
+                        checked={formData.is_featured} 
+                        onChange={(e) => setFormData({...formData, is_featured: e.target.checked})} 
+                      />
+                      <label className="form-check-label fw-bold ms-1" htmlFor="featuredSwitch">
+                        {formData.is_featured ? <span className="text-warning"><i className="bi bi-star-fill"></i> Unggulan</span> : <span className="text-muted"><i className="bi bi-star"></i> Standar</span>}
                       </label>
                     </div>
                   </div>
 
                   <div className="col-12 mb-4">
                     <label className="form-label fw-semibold">Deskripsi / Fasilitas</label>
-                    <textarea className="form-control form-control-sm" rows="2" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required></textarea>
+                    <textarea 
+                      className="form-control" 
+                      rows="5" 
+                      placeholder="Masukkan deskripsi lengkap paket tour dan fasilitas yang didapatkan..."
+                      value={formData.description} 
+                      onChange={(e) => setFormData({...formData, description: e.target.value})} 
+                      required
+                    ></textarea>
                   </div>
+
                   <div className="col-12 mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <label className="form-label fw-bold m-0" style={{ color: theme.primary }}>Jadwal Perjalanan</label>
@@ -241,15 +279,25 @@ const ManagePackages = () => {
                           <span className="badge bg-primary" style={{ fontSize: '0.7rem' }}>Hari ke-{index + 1}</span>
                           {itineraries.length > 1 && <button type="button" className="btn btn-sm text-danger p-0" onClick={() => handleRemoveDay(index)}><i className="bi bi-trash fs-6"></i></button>}
                         </div>
-                        <div className="row g-2">
+                        <div className="row g-3">
                           <div className="col-md-4">
-                            <select className="form-select form-select-sm" value={item.destination_id} onChange={(e) => handleItineraryChange(index, 'destination_id', e.target.value)} required>
+                            <label className="form-label small text-muted mb-1">Pilih Destinasi Utama</label>
+                            <select className="form-select" value={item.destination_id} onChange={(e) => handleItineraryChange(index, 'destination_id', e.target.value)} required>
                               <option value="">-- Pilih Destinasi --</option>
                               {destinations.map(dest => <option key={dest.id} value={dest.id}>{dest.name || dest.title}</option>)}
                             </select>
                           </div>
+                          
                           <div className="col-md-8">
-                            <input type="text" className="form-control form-select-sm" placeholder="Kegiatan..." value={item.activity} onChange={(e) => handleItineraryChange(index, 'activity', e.target.value)} required />
+                            <label className="form-label small text-muted mb-1">Rincian Kegiatan (Bisa Multi-baris / Enter)</label>
+                            <textarea 
+                              className="form-control" 
+                              rows="3"
+                              placeholder="05.30 : Persiapan dan sarapan&#10;06.30 : Berangkat menuju dermaga&#10;..."
+                              value={item.activity} 
+                              onChange={(e) => handleItineraryChange(index, 'activity', e.target.value)} 
+                              required 
+                            ></textarea>
                           </div>
                         </div>
                       </div>
@@ -277,21 +325,30 @@ const ManagePackages = () => {
                   >
                     <div className="position-relative">
                       <img 
-                        src={pkg.image_url} 
+                        src={pkg.image_url || pkg.image} 
                         className="card-img-top" 
                         alt={pkg.title} 
                         style={{ height: '160px', objectFit: 'cover', filter: pkg.is_available === false ? 'grayscale(80%)' : 'none' }} 
                         onError={(e) => e.target.src = 'https://via.placeholder.com/300x160?text=No+Image'} 
                       />
-                      {/* TAMBAHAN: LABEL STATUS DI ATAS FOTO */}
                       <div className="position-absolute top-0 start-0 w-100 p-2 d-flex justify-content-between">
                         <span className={`badge ${pkg.is_available === false ? 'bg-danger' : 'bg-success'} shadow-sm`} style={{ fontSize: '0.65rem' }}>
                           {pkg.is_available === false ? 'Tidak Tersedia' : 'Tersedia'}
                         </span>
                         <span className="badge bg-white text-dark shadow-sm" style={{ fontSize: '0.65rem' }}>{pkg.duration}</span>
                       </div>
+                      {/* LOGIKA PERBAIKAN: Menampilkan Badge Bintang Unggulan di Daftar Paket */}
+                      {(pkg.is_featured === true || pkg.is_featured === 1 || String(pkg.is_featured) === "1" || String(pkg.is_featured).toLowerCase() === "true") && (
+                        <div className="position-absolute bottom-0 end-0 p-2">
+                          <span className="badge bg-warning shadow-sm text-dark border border-white" style={{ fontSize: '0.7rem' }}>
+                            <i className="bi bi-star-fill"></i> Unggulan
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="card-body p-3">
+                      {/* Badge Kategori */}
+                      {pkg.category && <span className="badge bg-light text-primary border mb-2" style={{ fontSize: '0.65rem' }}>{pkg.category}</span>}
                       <div className="card-title-small text-truncate" title={pkg.title}>{pkg.title}</div>
                       <div className="d-flex align-items-center mb-2">
                         <i className="bi bi-geo-alt-fill text-danger me-1" style={{ fontSize: '0.75rem' }}></i>

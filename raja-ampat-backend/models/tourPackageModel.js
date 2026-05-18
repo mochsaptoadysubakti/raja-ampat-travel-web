@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 
-// 1. Mengambil Semua Paket BESERTA Galeri Destinasinya (JOIN)
+// 1. Ambil Semua Paket (Pastikan 'category' ikut ditarik)
 const getAllPackages = async () => {
     const query = `
         SELECT p.*, 
@@ -25,17 +25,16 @@ const getAllPackages = async () => {
     return result.rows;
 };
 
-// 2. Menyimpan Paket Baru + Jadwalnya (Transaction)
-// TAMBAHAN: is_available ditambahkan di parameter
-const createPackage = async (title, price, duration, image_url, description, is_available, itineraryArray) => {
+// 2. Buat Paket (Tambah kolom category dan is_featured)
+const createPackage = async (title, price, duration, image_url, description, is_available, is_featured, category, itineraryArray) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
-        // TAMBAHAN: is_available dan $6 dimasukkan ke dalam query SQL
+        // Tambah kolom category ($8)
         const pkgRes = await client.query(
-            'INSERT INTO tour_packages (title, price, duration, image_url, description, is_available) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [title, price, duration, image_url, description, is_available]
+            'INSERT INTO tour_packages (title, price, duration, image_url, description, is_available, is_featured, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [title, price, duration, image_url, description, is_available, is_featured, category]
         );
         const newPackage = pkgRes.rows[0];
 
@@ -59,17 +58,16 @@ const createPackage = async (title, price, duration, image_url, description, is_
     }
 };
 
-// 3. Update Paket
-// TAMBAHAN: is_available ditambahkan di parameter
-const updatePackage = async (id, title, price, duration, image_url, description, is_available, itineraryArray) => {
+// 3. Update Paket (Tambah kolom category dan is_featured)
+const updatePackage = async (id, title, price, duration, image_url, description, is_available, is_featured, category, itineraryArray) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
-        // TAMBAHAN: is_available = $6 dimasukkan ke dalam query SQL dan id jadi $7
+        // Tambah kolom category ($8) dan id jadi ($9)
         const pkgRes = await client.query(
-            'UPDATE tour_packages SET title = $1, price = $2, duration = $3, image_url = $4, description = $5, is_available = $6 WHERE id = $7 RETURNING *',
-            [title, price, duration, image_url, description, is_available, id]
+            'UPDATE tour_packages SET title = $1, price = $2, duration = $3, image_url = $4, description = $5, is_available = $6, is_featured = $7, category = $8 WHERE id = $9 RETURNING *',
+            [title, price, duration, image_url, description, is_available, is_featured, category, id]
         );
 
         await client.query('DELETE FROM itinerary WHERE package_id = $1', [id]);

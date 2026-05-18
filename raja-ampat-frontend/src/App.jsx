@@ -1,4 +1,11 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Import halaman Utama (Public)
+import Home from './pages/Home';
+import Register from './pages/Register'; 
+import Login from './pages/Login';
+import TourPackages from './pages/TourPackages'; 
+import TourDetail from './pages/TourDetail'; // <-- TAMBAHAN: Import halaman Detail Paket Tour
 
 // Import halaman Admin
 import AdminLogin from './pages/admin/AdminLogin';
@@ -16,6 +23,16 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Rute untuk halaman Utama (Public / Pengunjung) */}
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} /> 
+        <Route path="/login" element={<Login />} />
+        <Route path="/tour-packages" element={<TourPackages />} /> 
+        <Route path="/detail/:id" element={<TourDetail />} /> {/* <-- TAMBAHAN: Rute Detail Paket */}
+
+        {/* Redirect otomatis untuk /admin agar tidak layar putih */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+
         {/* Rute untuk halaman Login Admin */}
         <Route path="/admin/login" element={<AdminLogin />} />
         

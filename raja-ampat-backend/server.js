@@ -12,12 +12,13 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const contactRoutes = require('./routes/contactRoutes');
-
+const authRoutes = require('./routes/authRoutes');
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json()); // Agar bisa menerima request body berupa JSON
+
 
 // --- FITUR DEBUGGER ANTI-CRASH ---
 const safeRoute = (routeName, routeModule) => {
@@ -44,7 +45,7 @@ app.use('/api/reviews', safeRoute('reviewRoutes', reviewRoutes));
 app.use('/api/gallery', safeRoute('galleryRoutes', galleryRoutes));
 app.use('/api/blogs', safeRoute('blogRoutes', blogRoutes));
 app.use('/api/contacts', safeRoute('contactRoutes', contactRoutes));
-
+app.use('/api/auth', authRoutes);
 // Route dasar untuk tes server
 app.get('/', (req, res) => {
     res.send('API Raja Ampat Travel & Tourism Backend is Running!');

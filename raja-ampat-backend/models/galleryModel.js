@@ -16,6 +16,15 @@ const GalleryModel = {
     return result.rows[0];
   },
 
+  // --- FUNGSI BARU UNTUK EDIT / UPDATE ---
+  update: async (id, customer_name, photo_url, caption) => {
+    const result = await pool.query(
+      'UPDATE galleries SET customer_name = $1, photo_url = $2, caption = $3 WHERE id = $4 RETURNING *',
+      [customer_name, photo_url, caption, id]
+    );
+    return result.rows[0];
+  },
+
   // Menghapus data
   delete: async (id) => {
     await pool.query('DELETE FROM galleries WHERE id = $1', [id]);

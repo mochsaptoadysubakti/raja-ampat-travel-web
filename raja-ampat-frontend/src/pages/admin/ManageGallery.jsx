@@ -12,7 +12,7 @@ const ManageGallery = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
-  // State disesuaikan dengan kolom database: title, image, description
+  // State untuk form
   const [formData, setFormData] = useState({ title: '', image: '', description: '' });
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -44,12 +44,23 @@ const ManageGallery = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // PERBAIKAN 2: Kita kirim 'image' dan 'image_url' sekaligus 
+    // supaya aman masuk ke database, apa pun nama kolom di backend-mu.
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      image: formData.image,
+      image_url: formData.image 
+    };
+
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/gallery/${editingId}`, formData, config);
+        // PERBAIKAN 1: Pastikan editingId tidak undefined
+        await axios.put(`http://localhost:5000/api/gallery/${editingId}`, payload, config);
         alert('Data galeri diperbarui!');
       } else {
-        await axios.post('http://localhost:5000/api/gallery', formData, config);
+        await axios.post('http://localhost:5000/api/gallery', payload, config);
         alert('Data galeri ditambahkan!');
       }
       resetForm();
@@ -60,12 +71,18 @@ const ManageGallery = () => {
   };
 
   const handleEditClick = (gal) => {
+    // Kita baca dari berbagai kemungkinan nama kolom gambar
+    const imgSource = gal.image_url || gal.image || gal.url || gal.foto || '';
+    
     setFormData({
       title: gal.title || '', 
-      image: gal.image || '',
+      image: imgSource,
       description: gal.description || '' 
     });
-    setEditingId(gal.id);
+    
+    // PERBAIKAN 1: Cek apakah ID dari backend bernama 'id' atau '_id'
+    setEditingId(gal.id || gal._id);
+    
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -77,13 +94,17 @@ const ManageGallery = () => {
 
   const executeDelete = async () => {
     if (!galleryToDelete) return;
+    
+    // PERBAIKAN 1: Cek id saat hapus
+    const targetId = galleryToDelete.id || galleryToDelete._id;
+    
     try {
-      await axios.delete(`http://localhost:5000/api/gallery/${galleryToDelete.id}`, config);
+      await axios.delete(`http://localhost:5000/api/gallery/${targetId}`, config);
       setShowDeleteModal(false);
       setGalleryToDelete(null);
       fetchGalleries();
     } catch (error) {
-      alert("Gagal menghapus foto galeri.");
+      alert(`Gagal menghapus foto galeri: ${error.message}`);
     }
   };
 
@@ -226,33 +247,38 @@ const ManageGallery = () => {
                   ) : galleries.length === 0 ? (
                     <tr><td colSpan="4" className="text-center py-4 text-muted">Belum ada data di galeri.</td></tr>
                   ) : (
-                    galleries.map((gal) => (
-                      <tr key={gal.id}>
-                        <td className="ps-4">
-                          <img 
-                            src={gal.image} 
-                            alt={gal.title} 
-                            className="destination-table-image"
-                            style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '6px', backgroundColor: '#e9ecef' }} 
-                            onClick={() => openImageModal(gal.image)}
-                            onError={(e) => { 
-                              e.target.onerror = null; 
-                              e.target.src = 'https://via.placeholder.com/80x50?text=Error'; 
-                            }} 
-                          />
-                          <br />
-                          <small className="text-muted d-block mt-2" style={{ fontSize: '0.7rem', wordBreak: 'break-all', lineHeight: '1.2' }}>
-                            <strong>URL:</strong> {gal.image || 'Kosong'}
-                          </small>
-                        </td>
-                        <td className="fw-bold" style={{ color: theme.primary }}>{gal.title}</td>
-                        <td>{gal.description}</td>
-                        <td className="text-center pe-4">
-                          <button onClick={() => handleEditClick(gal)} className="btn btn-sm btn-outline-primary me-2"><i className="bi bi-pencil"></i></button>
-                          <button onClick={() => confirmDelete(gal)} className="btn btn-sm btn-outline-danger"><i className="bi bi-trash"></i></button>
-                        </td>
-                      </tr>
-                    ))
+                    galleries.map((gal) => {
+                      // PERBAIKAN 2: Pastikan gambar terbaca di tabel
+                      const imgSource = gal.image_url || gal.image || gal.url || gal.foto || '';
+                      
+                      return (
+                        <tr key={gal.id || gal._id}>
+                          <td className="ps-4">
+                            <img 
+                              src={imgSource} 
+                              alt={gal.title} 
+                              className="destination-table-image"
+                              style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '6px', backgroundColor: '#e9ecef' }} 
+                              onClick={() => openImageModal(imgSource)}
+                              onError={(e) => { 
+                                e.target.onerror = null; 
+                                e.target.src = 'https://via.placeholder.com/80x50?text=Error'; 
+                              }} 
+                            />
+                            <br />
+                            <small className="text-muted d-block mt-2" style={{ fontSize: '0.7rem', wordBreak: 'break-all', lineHeight: '1.2' }}>
+                              <strong>URL:</strong> {imgSource || 'Kosong'}
+                            </small>
+                          </td>
+                          <td className="fw-bold" style={{ color: theme.primary }}>{gal.title}</td>
+                          <td>{gal.description}</td>
+                          <td className="text-center pe-4">
+                            <button onClick={() => handleEditClick(gal)} className="btn btn-sm btn-outline-primary me-2"><i className="bi bi-pencil"></i></button>
+                            <button onClick={() => confirmDelete(gal)} className="btn btn-sm btn-outline-danger"><i className="bi bi-trash"></i></button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>

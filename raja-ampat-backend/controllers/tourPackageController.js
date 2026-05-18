@@ -10,11 +10,11 @@ const getPackages = async (req, res) => {
 };
 
 const addPackage = async (req, res) => {
-    // TAMBAHAN: Menerima is_available dari Frontend React
-    const { title, price, duration, image_url, description, is_available, itinerary } = req.body;
+    // Tangkap data category dari req.body
+    const { title, price, duration, image_url, description, is_available, is_featured, category, itinerary } = req.body;
     try {
-        // TAMBAHAN: Mengirim is_available ke Model
-        const newPkg = await Package.createPackage(title, price, duration, image_url, description, is_available, itinerary);
+        // Kirim category ke model
+        const newPkg = await Package.createPackage(title, price, duration, image_url, description, is_available, is_featured, category, itinerary);
         res.status(201).json({ status: "success", data: newPkg });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -22,11 +22,11 @@ const addPackage = async (req, res) => {
 };
 
 const updatePackage = async (req, res) => {
-    // TAMBAHAN: Menerima is_available dari Frontend React
-    const { title, price, duration, image_url, description, is_available, itinerary } = req.body;
+    // Tangkap data category dari req.body
+    const { title, price, duration, image_url, description, is_available, is_featured, category, itinerary } = req.body;
     try {
-        // TAMBAHAN: Mengirim is_available ke Model
-        const updatedPkg = await Package.updatePackage(req.params.id, title, price, duration, image_url, description, is_available, itinerary);
+        // Kirim category ke model
+        const updatedPkg = await Package.updatePackage(req.params.id, title, price, duration, image_url, description, is_available, is_featured, category, itinerary);
         res.status(200).json({ status: "success", data: updatedPkg });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -42,5 +42,4 @@ const deletePackage = async (req, res) => {
     }
 };
 
-// PASTIKAN NAMA DI SINI SAMA DENGAN YANG DI ROUTES
 module.exports = { getPackages, addPackage, updatePackage, deletePackage };
