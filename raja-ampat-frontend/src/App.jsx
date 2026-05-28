@@ -5,7 +5,13 @@ import Home from './pages/Home';
 import Register from './pages/Register'; 
 import Login from './pages/Login';
 import TourPackages from './pages/TourPackages'; 
-import TourDetail from './pages/TourDetail'; // <-- TAMBAHAN: Import halaman Detail Paket Tour
+import TourDetail from './pages/TourDetail';
+import BookingDetail from './pages/BookingDetail'; // <-- TAMBAHAN: Import halaman Booking Detail
+import UserProfile from './pages/UserProfile'; 
+import Destinations from './pages/Destinations'; 
+import Blog from './pages/Blog'; 
+import BlogDetail from './pages/BlogDetail';
+
 
 // Import halaman Admin
 import AdminLogin from './pages/admin/AdminLogin';
@@ -28,7 +34,12 @@ function App() {
         <Route path="/register" element={<Register />} /> 
         <Route path="/login" element={<Login />} />
         <Route path="/tour-packages" element={<TourPackages />} /> 
-        <Route path="/detail/:id" element={<TourDetail />} /> {/* <-- TAMBAHAN: Rute Detail Paket */}
+        <Route path="/detail/:id" element={<TourDetail />} />
+        <Route path="/booking/:id" element={<BookingDetail />} />
+        <Route path="/profile" element={<UserProfile />} /> 
+        <Route path="/destinasi" element={<Destinations />} /> 
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
 
         {/* Redirect otomatis untuk /admin agar tidak layar putih */}
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
@@ -50,10 +61,8 @@ function App() {
         <Route path="/admin/inbox" element={<ContactInbox />} />
         <Route path="/admin/reviews" element={<ManageReviews />} />
         
-        {/* Rute Manajemen Pengguna - Baru Diaktifkan */}
+        {/* Rute Manajemen Pengguna */}
         <Route path="/admin/users" element={<ManageUsers />} />
-
-        {/* Rute tambahan di masa depan bisa ditaruh di bawah sini */}
       </Routes>
     </Router>
   );

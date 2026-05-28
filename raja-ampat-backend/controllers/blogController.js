@@ -40,4 +40,15 @@ const deleteBlog = async (req, res) => {
     }
 };
 
-module.exports = { getBlogs, addBlog, updateBlog, deleteBlog };
+const getBlogById = async (req, res) => {
+    try {
+        const blog = await Blog.getBlogById(req.params.id); // Pastikan fungsi ini ada di model
+        if (!blog) {
+            return res.status(404).json({ message: "Artikel tidak ditemukan" });
+        }
+        res.status(200).json({ data: blog });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+module.exports = { getBlogs, getBlogById, addBlog, updateBlog, deleteBlog };

@@ -18,7 +18,6 @@ const useCountUp = (endValue, duration = 2000, isFloat = false) => {
     const step = (timestamp) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
-      // Efek easing (melambat di akhir)
       const easeProgress = 1 - Math.pow(1 - progress, 4);
       const current = easeProgress * end;
 
@@ -43,37 +42,28 @@ const Home = () => {
   const [packages, setPackages] = useState([]);
   const [galleries, setGalleries] = useState([]);
   
-  // --- STATE UNTUK REVIEWS ---
   const [reviews, setReviews] = useState([]);
-  
-  // --- STATE UNTUK ANGKA STATISTIK (RAW NUMBER) ---
   const [totalPackagesNum, setTotalPackagesNum] = useState(0);
   const [avgRatingNum, setAvgRatingNum] = useState(0);
   const [totalReviewsNum, setTotalReviewsNum] = useState(0);
   
-  // Menerapkan Hook Animasi Angka
   const displayReviews = useCountUp(totalReviewsNum, 2000);
   const displayPackages = useCountUp(totalPackagesNum, 2000);
-  const displayRating = useCountUp(avgRatingNum, 2000, true); // true = tampilkan desimal
-  const displayGuide = useCountUp(100, 2000); // Selalu 100%
+  const displayRating = useCountUp(avgRatingNum, 2000, true); 
+  const displayGuide = useCountUp(100, 2000); 
   
-  // --- STATE UNTUK USER LOGIN ---
   const [user, setUser] = useState(null);
   const [showLogoutAnim, setShowLogoutAnim] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false); // State dibiarkan agar tidak error
 
-  // State untuk animasi ketikan
   const [typedText, setTypedText] = useState("");
-
-  // State untuk Form Contact
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // State untuk Popup Destinasi & Hamburger Menu
   const [selectedDest, setSelectedDest] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Efek Animasi Ketikan
   useEffect(() => {
     const fullText = "Jelajahi \nRaja Ampat";
     let index = 0;
@@ -84,11 +74,9 @@ const Home = () => {
         clearInterval(timer);
       }
     }, 120); 
-
     return () => clearInterval(timer);
   }, []);
 
-  // Mengambil data dari API Backend & Cek Sesi Login
   useEffect(() => {
     const storedUser = localStorage.getItem('userData');
     if (storedUser) {
@@ -107,27 +95,24 @@ const Home = () => {
       }
     };
 
-const fetchPackages = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/tour_packages'); 
-      const dataArray = response.data.data || response.data || [];
-      if (Array.isArray(dataArray) && dataArray.length > 0) {
-        
-        // Logika Filter Paket Unggulan
-        const featuredPackages = dataArray.filter(pkg => 
-          pkg.is_featured === true || pkg.is_featured === 1 || String(pkg.is_featured) === "true" || String(pkg.is_featured) === "1"
-        );
-
-        setPackages(featuredPackages.slice(0, 3));
-        setTotalPackagesNum(dataArray.length); 
-      } else {
-        setTotalPackagesNum(10); 
+    const fetchPackages = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/tour_packages'); 
+        const dataArray = response.data.data || response.data || [];
+        if (Array.isArray(dataArray) && dataArray.length > 0) {
+          const featuredPackages = dataArray.filter(pkg => 
+            pkg.is_featured === true || pkg.is_featured === 1 || String(pkg.is_featured) === "true" || String(pkg.is_featured) === "1"
+          );
+          setPackages(featuredPackages.slice(0, 3));
+          setTotalPackagesNum(dataArray.length); 
+        } else {
+          setTotalPackagesNum(10); 
+        }
+      } catch (error) {
+        setTotalPackagesNum(10);
       }
-    } catch (error) {
-      setTotalPackagesNum(10);
-    }
-  };
-    
+    };
+
     const fetchGalleries = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/gallery'); 
@@ -146,16 +131,12 @@ const fetchPackages = async () => {
         const dataArray = response.data.data || response.data || [];
         if (Array.isArray(dataArray) && dataArray.length > 0) {
           setReviews(dataArray.slice(0, 3)); 
-          
-          // Hitung Rata-Rata Rating
           const sum = dataArray.reduce((acc, curr) => acc + (Number(curr.rating) || 5), 0);
           setAvgRatingNum(sum / dataArray.length);
-          
-          // MENGAMBIL JUMLAH WISATAWAN PUAS DARI PANJANG DATA REVIEW
           setTotalReviewsNum(dataArray.length); 
         } else {
           setAvgRatingNum(4.9);
-          setTotalReviewsNum(300); // Default fallback
+          setTotalReviewsNum(300); 
         }
       } catch (error) {
         setAvgRatingNum(4.9);
@@ -169,7 +150,6 @@ const fetchPackages = async () => {
     fetchReviews();
   }, []);
 
-  // --- FUNGSI LOGOUT DENGAN ANIMASI ---
   const handleLogout = () => {
     setShowLogoutAnim(true);
     localStorage.removeItem('userToken');
@@ -202,7 +182,6 @@ const fetchPackages = async () => {
   return (
     <div style={{ backgroundColor: '#FFFFFF', overflowX: 'hidden', paddingTop: '70px' }}>
       
-      {/* --- INJEKSI CSS ANIMASI, EFEK HOVER, & RESPONSIVE --- */}
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap');
@@ -214,10 +193,9 @@ const fetchPackages = async () => {
           @keyframes fadeInRight { 0% { opacity: 0; transform: translateX(50px); } 100% { opacity: 1; transform: translateX(0); } }
           @keyframes fadeInLeft { 0% { opacity: 0; transform: translateX(-50px); } 100% { opacity: 1; transform: translateX(0); } }
           @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
-          
           @keyframes blinkCursor { 50% { opacity: 0; } }
-          .typing-cursor { animation: blinkCursor 0.8s step-end infinite; color: #FFB76C; }
 
+          .typing-cursor { animation: blinkCursor 0.8s step-end infinite; color: #FFB76C; }
           .anim-fade-up { animation: fadeInUp 1s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
           .anim-fade-right { animation: fadeInRight 1.2s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
           .anim-fade-left { animation: fadeInLeft 1.2s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
@@ -231,77 +209,62 @@ const fetchPackages = async () => {
 
           .btn-modern { transition: all 0.3s ease; }
           .btn-modern:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important; }
-          
           .form-control-custom:focus { box-shadow: none; border-color: #FFB76C !important; background-color: #fff !important; }
 
-          /* --- CSS KHUSUS HERO GAMBAR BARU --- */
-          .hero-wave-left {
-            width: 50%;
-            max-width: 900px;
-            object-fit: contain;
-            object-position: top left;
-            z-index: 1;
-            pointer-events: none;
-            top: 55vh; 
-          }
-          .hero-wave-right {
-            width: 35%;
-            max-width: 600px;
-            object-fit: contain;
-            object-position: top right;
-            z-index: 1;
-            pointer-events: none;
-            top: 5vh;
-          }
-          .hero-content-wrapper {
-            z-index: 10;
-            padding-top: 10vh; 
-            padding-left: 10vw;
-            min-height: 85vh; 
-          }
-          /* UKURAN FONT HERO DIPERKECIL AGAR LEBIH PROPORSIONAL */
-          .hero-title {
-            font-size: 3.2rem;
-            line-height: 1.2;
-            letter-spacing: -1px;
-            white-space: pre-line;
-            text-shadow: 2px 2px 15px rgba(255,255,255,0.9); 
-          }
-          .hero-desc {
-            line-height: 1.6;
-            max-width: 85%;
-            text-shadow: 1px 1px 10px rgba(255,255,255,0.9);
-          }
+          .hero-wave-left { width: 50%; max-width: 900px; object-fit: contain; object-position: top left; z-index: 1; pointer-events: none; top: 55vh; }
+          .hero-wave-right { width: 35%; max-width: 600px; object-fit: contain; object-position: top right; z-index: 1; pointer-events: none; top: 5vh; }
+          .hero-content-wrapper { z-index: 10; padding-top: 10vh; padding-left: 10vw; min-height: 85vh; }
+          .hero-title { font-size: 3.2rem; line-height: 1.2; letter-spacing: -1px; white-space: pre-line; text-shadow: 2px 2px 15px rgba(255,255,255,0.9); }
+          .hero-desc { line-height: 1.6; max-width: 85%; text-shadow: 1px 1px 10px rgba(255,255,255,0.9); }
 
-          /* --- CSS UNTUK SECTION STATISTIK --- */
-          /* UKURAN FONT ANGKA STATISTIK DIPERKECIL */
-          .stats-number {
-            color: #11142D; 
-            font-size: 2.4rem; 
-            font-weight: 700;
-            margin-bottom: 2px;
-            font-family: 'Poppins', sans-serif;
-            letter-spacing: -1px;
-          }
-          .stats-text {
-            color: #4A4A68; 
-            font-size: 1rem; 
-            font-weight: 500;
-          }
+          .stats-number { color: #11142D; font-size: 2.4rem; font-weight: 700; margin-bottom: 2px; font-family: 'Poppins', sans-serif; letter-spacing: -1px; }
+          .stats-text { color: #4A4A68; font-size: 1rem; font-weight: 500; }
 
-          /* --- CSS UNTUK POPUP MODAL --- */
-          .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1050; display: flex; justify-content: center; align-items: center; padding: 20px; opacity: 0; animation: fadeInModal 0.3s forwards;
-          }
+          .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1050; display: flex; justify-content: center; align-items: center; padding: 20px; opacity: 0; animation: fadeInModal 0.3s forwards; }
           .modal-content-custom { background-color: #fff; border-radius: 20px; max-width: 600px; width: 100%; overflow: hidden; position: relative; transform: scale(0.9); animation: scaleUpModal 0.3s forwards; box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
           .modal-content-small { background-color: #fff; border-radius: 20px; max-width: 400px; width: 100%; padding: 40px 20px; text-align: center; transform: scale(0.9); animation: scaleUpModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
           .modal-img { height: 350px; object-fit: cover; }
           @keyframes fadeInModal { to { opacity: 1; } }
           @keyframes scaleUpModal { to { transform: scale(1); } }
-          
-          /* Animasi Loading Circle */
           .spinner-custom { width: 50px; height: 50px; border: 4px solid rgba(255, 183, 108, 0.3); border-top-color: #FFB76C; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
           @keyframes spin { 100% { transform: rotate(360deg); } }
+
+          /* --- CSS UNTUK POPUP PROFIL (DROPDOWN) DIBIARKAN AGAR TIDAK MENGUBAH KODE LAIN --- */
+          .profile-dropdown-container { position: relative; }
+          .profile-popup {
+            position: absolute;
+            top: 130%;
+            right: 0;
+            width: 280px;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            padding: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1050;
+            border: 1px solid rgba(0,0,0,0.05);
+          }
+          .profile-popup.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+          }
+          .profile-popup::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            background-color: #fff;
+            transform: rotate(45deg);
+            border-left: 1px solid rgba(0,0,0,0.05);
+            border-top: 1px solid rgba(0,0,0,0.05);
+          }
+          .profile-popup-avatar { width: 64px; height: 64px; border-radius: 50%; border: 3px solid #FFB76C; padding: 2px; }
 
           /* --- CSS KHUSUS ANIMASI GALERI --- */
           .gallery-wrap { overflow: hidden; border-radius: 10px; transition: all 0.4s ease; cursor: pointer; }
@@ -309,7 +272,6 @@ const fetchPackages = async () => {
           .gallery-wrap:hover { transform: translateY(-8px); box-shadow: 0 15px 25px rgba(0,0,0,0.15) !important; }
           .gallery-wrap:hover img { transform: scale(1.08); }
 
-          /* --- PERBAIKAN RESPONSIVE KHUSUS LAYAR HP (MOBILE) --- */
           @media (max-width: 991px) {
             .hero-wave-left { width: 100%; opacity: 0.3; top: 30vh; }
             .hero-wave-right { display: none; }
@@ -318,9 +280,10 @@ const fetchPackages = async () => {
             .hero-desc { max-width: 100%; margin-left: auto; margin-right: auto; }
             .nav-actions-mobile { display: flex !important; flex-direction: column; position: absolute; top: 70px; left: 5vw; right: 5vw; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; gap: 15px !important; z-index: 1000; }
             .stats-number { font-size: 2rem; }
+            .profile-popup { right: 50%; transform: translateX(50%) translateY(-10px); }
+            .profile-popup.open { transform: translateX(50%) translateY(0); }
+            .profile-popup::before { right: 50%; transform: translateX(50%) rotate(45deg); }
           }
-
-          /* --- ICON WRAPPER CSS --- */
           .icon-circle { width: 70px; height: 70px; background-color: #FFB76C; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #fff; }
         `}
       </style>
@@ -336,7 +299,7 @@ const fetchPackages = async () => {
         </div>
       )}
 
-      {/* --- 1. NAVBAR MODERN (DENGAN LOGIKA LOGIN) --- */}
+      {/* --- 1. NAVBAR MODERN (DENGAN LINK KE HALAMAN PROFIL) --- */}
       <nav className="navbar py-2 fixed-top" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.05)', zIndex: 999 }}>
         <div className="container-fluid px-4 px-lg-5 d-flex align-items-center">
           
@@ -353,23 +316,29 @@ const fetchPackages = async () => {
           </button>
 
           <div className={`align-items-center gap-4 ms-lg-auto d-lg-flex ${isMobileMenuOpen ? 'nav-actions-mobile' : 'd-none'}`}>
-            {/* LINK KE PAKET WISATA DITAMBAHKAN DI SINI */}
             <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
-            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="#" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
+            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/destinasi" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
+            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/Blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
             
-            {/* TANDA LOGIN DINAMIS */}
             {user ? (
-              <div className="d-flex align-items-center gap-3">
-                <span className="fw-bold text-dark fs-6">
-                  Halo, <span style={{ color: '#FFB76C' }}>{user.name.split(' ')[0]}</span>!
+              // PERBAIKAN: Menghapus dropdown popup dan menjadikannya Link ke halaman /profile
+              <Link 
+                className="d-flex align-items-center gap-2 px-3 py-1 shadow-sm text-decoration-none" 
+                style={{ backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '50px', transition: 'all 0.3s', zIndex: 1041 }}
+                to="/profile"
+                onClick={() => setIsMobileMenuOpen(false)}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+              >
+                <span className="fw-bold text-dark fs-6 d-none d-md-block" style={{ fontSize: '0.9rem' }}>
+                  Halo, <span style={{ color: '#FFB76C' }}>{user.name.split(' ')[0]}</span>
                 </span>
-                <button 
-                  onClick={handleLogout} 
-                  className="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-medium"
-                >
-                  Keluar
-                </button>
-              </div>
+                <img 
+                  src={`https://ui-avatars.com/api/?name=${user.name}&background=FFB76C&color=000&bold=true`} 
+                  alt="Profile" 
+                  style={{ width: '32px', height: '32px', borderRadius: '50%' }} 
+                />
+              </Link>
             ) : (
               <>
                 <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/login" onClick={() => setIsMobileMenuOpen(false)}>Masuk</Link>
@@ -384,21 +353,17 @@ const fetchPackages = async () => {
       {/* --- 2. HERO SECTION & STATISTIK --- */}
       <div className="container-fluid px-0 position-relative" style={{ backgroundColor: '#fff', zIndex: 2, paddingBottom: '60px', overflow: 'hidden' }}>
         
-        {/* Latar Belakang Ombak Kiri (Perahu) */}
         <img 
           src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/e3458f00-5a71-4e2f-9d68-ef1fdc5c6df6" 
           alt="Perahu Raja Ampat" 
           className="position-absolute start-0 hero-wave-left anim-fade-right"
         />
-        
-        {/* Latar Belakang Ombak Kanan (Pantai) */}
         <img 
           src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/058720a5-0eee-4604-b3df-ea48915a2d41" 
           alt="Pantai Raja Ampat" 
           className="position-absolute end-0 hero-wave-right anim-fade-left d-none d-md-block"
         />
 
-        {/* Wrapper Konten Teks */}
         <div className="container-fluid position-relative hero-content-wrapper d-flex flex-column justify-content-start">
           <div className="row w-100">
             <div className="col-lg-7">
@@ -419,25 +384,20 @@ const fetchPackages = async () => {
           </div>
         </div>
 
-        {/* --- ANIMATED DATA STATISTIK --- */}
         <div className="container position-relative" style={{ zIndex: 10, marginTop: '300px' }}>
           <div className="row text-center g-4 justify-content-center">
-            {/* Stat 1: Dinamis dari Total Review */}
             <div className="col-6 col-md-3 anim-fade-up delay-1">
               <h2 className="stats-number">{displayReviews}+</h2>
               <p className="stats-text">Wisatawan Puas</p>
             </div>
-            {/* Stat 2: Dinamis dari Total Paket */}
             <div className="col-6 col-md-3 anim-fade-up delay-2">
               <h2 className="stats-number">{displayPackages}+</h2>
               <p className="stats-text">Paket Wisata</p>
             </div>
-            {/* Stat 3: Dinamis Rata-rata Rating */}
             <div className="col-6 col-md-3 anim-fade-up delay-1">
               <h2 className="stats-number">{displayRating}</h2>
               <p className="stats-text">Rating Pengguna</p>
             </div>
-            {/* Stat 4: Fix 100% */}
             <div className="col-6 col-md-3 anim-fade-up delay-2">
               <h2 className="stats-number">{displayGuide}%</h2>
               <p className="stats-text">Pemandu Lokal</p>
@@ -614,13 +574,13 @@ const fetchPackages = async () => {
                   </div>
                   <div className="d-flex justify-content-between align-items-center px-4 mt-auto">
                     <span className="fw-bold text-dark fs-5">Rp {Number(pkg.price).toLocaleString('id-ID')}</span>
-            <button 
-              className="btn fw-semibold px-3 py-2 border-0 rounded-pill" 
-              style={{ backgroundColor: '#FFB76C', color: '#000' }}
-              onClick={() => navigate(`/detail/${pkg.id}`, { state: { packageData: pkg } })}
-            >
-              Pesan
-            </button>
+                    <button 
+                      className="btn fw-semibold px-3 py-2 border-0 rounded-pill" 
+                      style={{ backgroundColor: '#FFB76C', color: '#000' }}
+                      onClick={() => navigate(`/detail/${pkg.id}`, { state: { packageData: pkg } })}
+                    >
+                      Pesan
+                    </button>
                   </div>
                 </div>
               </div>
@@ -781,7 +741,8 @@ const fetchPackages = async () => {
                 <div className="d-flex flex-column align-items-center gap-3 small fw-medium text-dark mt-3">
                   <a href="#" className="text-dark text-decoration-none d-flex align-items-center gap-2">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.036 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/>
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                      <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                     </svg>
                     ampatheia.id
                   </a>

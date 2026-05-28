@@ -13,11 +13,17 @@ const ManagePackages = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
-  // TAMBAHAN: State category ditambahkan ke formData
+  // STATE DATA UMUM
   const [formData, setFormData] = useState({
-    title: '', price: '', duration: '', image_url: '', category: '', description: '', is_available: true, is_featured: false
+    title: '', price: '', duration: '', image_url: '', category: '', is_available: true, is_featured: false
   });
 
+  // STATE DESKRIPSI & FASILITAS DIPISAH
+  const [pureDescription, setPureDescription] = useState(''); // Khusus narasi deskripsi
+  const [included, setIncluded] = useState(['']); // List fasilitas termasuk
+  const [excluded, setExcluded] = useState(['']); // List fasilitas tidak termasuk
+
+  // STATE ITINERARY
   const [itineraries, setItineraries] = useState([
     { destination_id: '', activity: '' } 
   ]);
@@ -53,25 +59,53 @@ const ManagePackages = () => {
     fetchData();
   }, [navigate]);
 
+  // --- HANDLER ITINERARY ---
   const handleAddDay = () => setItineraries([...itineraries, { destination_id: '', activity: '' }]);
   const handleRemoveDay = (index) => setItineraries(itineraries.filter((_, i) => i !== index));
-
   const handleItineraryChange = (index, field, value) => {
     const newItin = [...itineraries];
     newItin[index][field] = value;
     setItineraries(newItin);
   };
 
+  // --- HANDLER FASILITAS ---
+  const handleIncludedChange = (index, value) => {
+    const newInc = [...included];
+    newInc[index] = value;
+    setIncluded(newInc);
+  };
+  const handleExcludedChange = (index, value) => {
+    const newExc = [...excluded];
+    newExc[index] = value;
+    setExcluded(newExc);
+  };
+
+  // --- HANDLER SUBMIT (TRIK GABUNG DATA AGAR COCOK DENGAN BACKEND LAMA) ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Filter list yang kosong
+      const validIncluded = included.filter(item => item.trim() !== "");
+      const validExcluded = excluded.filter(item => item.trim() !== "");
+
+      // Membungkus semuanya menjadi struktur penanda teks rapi di dalam deskripsi
+      // Agar backend mendeteksi ini sebagai tipe data string TEXT biasa
+      const combinedDescription = [
+        "---DESKRIPSI---",
+        pureDescription,
+        "---INCLUDED---",
+        validIncluded.join("\n"),
+        "---EXCLUDED---",
+        validExcluded.join("\n")
+      ].join("\n");
+
       const payload = {
         title: formData.title,
         price: formData.price,
         duration: formData.duration,
         image_url: formData.image_url,
-        category: formData.category, // Kirim kategori ke backend
-        description: formData.description,
+        category: formData.category,
+        description: combinedDescription, // Teks yang sudah disatukan dikirim ke kolom description lama
         is_available: formData.is_available,
         is_featured: formData.is_featured,
         itinerary: itineraries.map((it, index) => ({
@@ -83,10 +117,10 @@ const ManagePackages = () => {
 
       if (editingId) {
         await axios.put(`http://localhost:5000/api/tour_packages/${editingId}`, payload, config);
-        alert('Paket & Jadwal berhasil diperbarui!');
+        alert('Paket, Fasilitas & Jadwal berhasil diperbarui!');
       } else {
         await axios.post('http://localhost:5000/api/tour_packages', payload, config);
-        alert('Paket & Jadwal berhasil ditambahkan!');
+        alert('Paket, Fasilitas & Jadwal berhasil ditambahkan!');
       }
       resetForm();
       fetchData();
@@ -95,16 +129,41 @@ const ManagePackages = () => {
     }
   };
 
+  // --- HANDLER EDIT (TRIK PISAH TEKS KEMBALI KE FORM MASING-MASING) ---
   const handleEditClick = (pkg) => {
+    const rawDesc = pkg.description || '';
+    
+    let descPart = rawDesc;
+    let incPart = [''];
+    let excPart = [''];
+
+    // Jika teks di database mengandung penanda khusus yang kita buat saat submit
+    if (rawDesc.includes("---DESKRIPSI---")) {
+      try {
+        const parts = rawDesc.split("---INCLUDED---");
+        descPart = parts[0].replace("---DESKRIPSI---\n", "").trim();
+        
+        const subParts = parts[1].split("---EXCLUDED---");
+        const incText = subParts[0].trim();
+        const excText = subParts[1].trim();
+
+        if (incText) incPart = incText.split("\n");
+        if (excText) excPart = excText.split("\n");
+      } catch (err) {
+        console.error("Gagal parse kecocokan deskripsi lama");
+      }
+    }
+
+    setPureDescription(descPart);
+    setIncluded(incPart);
+    setExcluded(excPart);
+
     setFormData({
       title: pkg.title, 
       price: pkg.price, 
       duration: pkg.duration, 
-      image_url: pkg.image_url || pkg.image || '', // Menyesuaikan dengan nama kolom DB
+      image_url: pkg.image_url || pkg.image || '', 
       category: pkg.category || pkg.kategori || '',
-      description: pkg.description || '',
-      
-      // PERBAIKAN: Membaca format angka (1/0) atau string ("1"/"0", "true"/"false") dari Database
       is_available: pkg.is_available === false || pkg.is_available === 0 || String(pkg.is_available) === "0" || String(pkg.is_available).toLowerCase() === "false" ? false : true,
       is_featured: pkg.is_featured === true || pkg.is_featured === 1 || String(pkg.is_featured) === "1" || String(pkg.is_featured).toLowerCase() === "true" 
     });
@@ -142,7 +201,10 @@ const ManagePackages = () => {
   };
 
   const resetForm = () => {
-    setFormData({ title: '', price: '', duration: '', image_url: '', category: '', description: '', is_available: true, is_featured: false });
+    setFormData({ title: '', price: '', duration: '', image_url: '', category: '', is_available: true, is_featured: false });
+    setPureDescription('');
+    setIncluded(['']);
+    setExcluded(['']);
     setItineraries([{ destination_id: '', activity: '' }]);
     setEditingId(null);
     setShowForm(false);
@@ -211,7 +273,6 @@ const ManagePackages = () => {
                     <input type="text" className="form-control" placeholder="3 Hari 2 Malam" value={formData.duration} onChange={(e) => setFormData({...formData, duration: e.target.value})} required />
                   </div>
                   
-                  {/* TAMBAHAN: Dropdown Kategori */}
                   <div className="col-md-4 mb-3">
                     <label className="form-label fw-semibold">Kategori Paket</label>
                     <select className="form-select" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} required>
@@ -256,18 +317,80 @@ const ManagePackages = () => {
                     </div>
                   </div>
 
+                  {/* FORM 1: KOTAK TEXTAREA KHUSUS DESKRIPSI UTAMA */}
                   <div className="col-12 mb-4">
-                    <label className="form-label fw-semibold">Deskripsi / Fasilitas</label>
+                    <label className="form-label fw-semibold">Deskripsi Paket Wisata</label>
                     <textarea 
                       className="form-control" 
-                      rows="5" 
-                      placeholder="Masukkan deskripsi lengkap paket tour dan fasilitas yang didapatkan..."
-                      value={formData.description} 
-                      onChange={(e) => setFormData({...formData, description: e.target.value})} 
+                      rows="4" 
+                      placeholder="Masukkan narasi atau daya tarik dari paket wisata ini..."
+                      value={pureDescription} 
+                      onChange={(e) => setPureDescription(e.target.value)} 
                       required
                     ></textarea>
                   </div>
 
+                  {/* FORM 2: KOTAK LIST LAYANAN FASILITAS (TERMASUK & TIDAK) */}
+                  <div className="col-12 mb-4">
+                    <label className="form-label fw-bold m-0 mb-3" style={{ color: theme.primary }}>Fasilitas Paket (List Dinamis)</label>
+                    <div className="row g-3">
+                      
+                      {/* Kolom Kiri: Included */}
+                      <div className="col-md-6">
+                        <div className="p-3 border rounded h-100 bg-light">
+                          <label className="form-label fw-semibold text-success"><i className="bi bi-check-circle-fill me-1"></i> Yang Termasuk (Included)</label>
+                          {included.map((item, index) => (
+                            <div key={index} className="d-flex gap-2 mb-2">
+                              <input 
+                                type="text" 
+                                className="form-control" 
+                                placeholder="Contoh: Penginapan, Makan 3x sehari..." 
+                                value={item} 
+                                onChange={(e) => handleIncludedChange(index, e.target.value)} 
+                              />
+                              {included.length > 1 && (
+                                <button type="button" className="btn btn-outline-danger px-2" onClick={() => setIncluded(included.filter((_, i) => i !== index))}>
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button type="button" className="btn btn-sm btn-outline-success mt-1" onClick={() => setIncluded([...included, ""])}>
+                            + Tambah Baris
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Kolom Kanan: Excluded */}
+                      <div className="col-md-6">
+                        <div className="p-3 border rounded h-100 bg-light">
+                          <label className="form-label fw-semibold text-danger"><i className="bi bi-x-circle-fill me-1"></i> Yang Tidak Termasuk (Excluded)</label>
+                          {excluded.map((item, index) => (
+                            <div key={index} className="d-flex gap-2 mb-2">
+                              <input 
+                                type="text" 
+                                className="form-control" 
+                                placeholder="Contoh: Tiket Pesawat, Keperluan Pribadi..." 
+                                value={item} 
+                                onChange={(e) => handleExcludedChange(index, e.target.value)} 
+                              />
+                              {excluded.length > 1 && (
+                                <button type="button" className="btn btn-outline-danger px-2" onClick={() => setExcluded(excluded.filter((_, i) => i !== index))}>
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={() => setExcluded([...excluded, ""])}>
+                            + Tambah Baris
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* JADWAL PERJALANAN (ITINERARY) */}
                   <div className="col-12 mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <label className="form-label fw-bold m-0" style={{ color: theme.primary }}>Jadwal Perjalanan</label>
@@ -337,7 +460,6 @@ const ManagePackages = () => {
                         </span>
                         <span className="badge bg-white text-dark shadow-sm" style={{ fontSize: '0.65rem' }}>{pkg.duration}</span>
                       </div>
-                      {/* LOGIKA PERBAIKAN: Menampilkan Badge Bintang Unggulan di Daftar Paket */}
                       {(pkg.is_featured === true || pkg.is_featured === 1 || String(pkg.is_featured) === "1" || String(pkg.is_featured).toLowerCase() === "true") && (
                         <div className="position-absolute bottom-0 end-0 p-2">
                           <span className="badge bg-warning shadow-sm text-dark border border-white" style={{ fontSize: '0.7rem' }}>
@@ -347,7 +469,6 @@ const ManagePackages = () => {
                       )}
                     </div>
                     <div className="card-body p-3">
-                      {/* Badge Kategori */}
                       {pkg.category && <span className="badge bg-light text-primary border mb-2" style={{ fontSize: '0.65rem' }}>{pkg.category}</span>}
                       <div className="card-title-small text-truncate" title={pkg.title}>{pkg.title}</div>
                       <div className="d-flex align-items-center mb-2">

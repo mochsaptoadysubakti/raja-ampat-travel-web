@@ -31,13 +31,24 @@ const registerUser = async (req, res) => {
     }
 };
 
-// 3. UPDATE USER (Fungsi Baru untuk fitur Edit di Dashboard)
+// 3. UPDATE USER (Sudah Diperbaiki - Dengan Validasi Mencegah Null)
 const updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, email, phone, role } = req.body;
 
+    // VALIDASI: Cegah error database dengan menolak request jika name atau email kosong
+    if (!name || !email) {
+        return res.status(400).json({ 
+            message: "Gagal menyimpan: Nama dan Email wajib disertakan!" 
+        });
+    }
+
     try {
-        const updatedUser = await User.updateUser(id, name, email, phone, role);
+        // Jika dari frontend (React) tidak mengirim role (karena user biasa yang edit profil), 
+        // pastikan nilainya tidak menjadi undefined. Tetapkan default 'user'.
+        const userRole = role || 'user';
+
+        const updatedUser = await User.updateUser(id, name, email, phone, userRole);
         
         if (!updatedUser) {
             return res.status(404).json({ message: "User tidak ditemukan!" });

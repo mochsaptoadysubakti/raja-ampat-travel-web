@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 
-// 1. Ambil Semua Paket (Pastikan 'category' ikut ditarik)
+// 1. Ambil Semua Paket (Otomatis menarik seluruh kolom termasuk included & excluded karena memakai p.*)
 const getAllPackages = async () => {
     const query = `
         SELECT p.*, 
@@ -25,19 +25,22 @@ const getAllPackages = async () => {
     return result.rows;
 };
 
-// 2. Buat Paket (Tambah kolom category dan is_featured)
-const createPackage = async (title, price, duration, image_url, description, is_available, is_featured, category, itineraryArray) => {
+// 2. Buat Paket (Menambahkan kolom included ($9) dan excluded ($10) ke dalam Query)
+const createPackage = async (title, price, duration, image_url, description, is_available, is_featured, category, itineraryArray, included, excluded) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
-        // Tambah kolom category ($8)
+        // Modifikasi query INSERT untuk memasukkan kolom baru
         const pkgRes = await client.query(
-            'INSERT INTO tour_packages (title, price, duration, image_url, description, is_available, is_featured, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [title, price, duration, image_url, description, is_available, is_featured, category]
+            `INSERT INTO tour_packages 
+            (title, price, duration, image_url, description, is_available, is_featured, category, included, excluded) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+            [title, price, duration, image_url, description, is_available, is_featured, category, included, excluded]
         );
         const newPackage = pkgRes.rows[0];
 
+        // Memasukkan data jadwal perjalanan (itinerary)
         if (itineraryArray && itineraryArray.length > 0) {
             for (let i = 0; i < itineraryArray.length; i++) {
                 const item = itineraryArray[i];
@@ -58,18 +61,21 @@ const createPackage = async (title, price, duration, image_url, description, is_
     }
 };
 
-// 3. Update Paket (Tambah kolom category dan is_featured)
-const updatePackage = async (id, title, price, duration, image_url, description, is_available, is_featured, category, itineraryArray) => {
+// 3. Update Paket (Menambahkan kolom included ($9) dan excluded ($10), serta memindahkan ID ke posisi ($11))
+const updatePackage = async (id, title, price, duration, image_url, description, is_available, is_featured, category, itineraryArray, included, excluded) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
-        // Tambah kolom category ($8) dan id jadi ($9)
+        // Modifikasi query UPDATE untuk memperbarui kolom fasilitas terpisah
         const pkgRes = await client.query(
-            'UPDATE tour_packages SET title = $1, price = $2, duration = $3, image_url = $4, description = $5, is_available = $6, is_featured = $7, category = $8 WHERE id = $9 RETURNING *',
-            [title, price, duration, image_url, description, is_available, is_featured, category, id]
+            `UPDATE tour_packages 
+            SET title = $1, price = $2, duration = $3, image_url = $4, description = $5, is_available = $6, is_featured = $7, category = $8, included = $9, excluded = $10 
+            WHERE id = $11 RETURNING *`,
+            [title, price, duration, image_url, description, is_available, is_featured, category, included, excluded, id]
         );
 
+        // Hapus itinerary lama lalu masukkan kembali yang baru untuk sinkronisasi
         await client.query('DELETE FROM itinerary WHERE package_id = $1', [id]);
 
         if (itineraryArray && itineraryArray.length > 0) {

@@ -14,10 +14,11 @@ const TourPackages = () => {
   const [selectedDuration, setSelectedDuration] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  // --- STATE USER & ANIMASI LOGOUT ---
+  // --- STATE USER, ANIMASI LOGOUT & PROFIL ---
   const [user, setUser] = useState(null);
   const [showLogoutAnim, setShowLogoutAnim] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false); // State untuk Popup Profil
 
   // Mengambil data dari API & Cek Sesi
   useEffect(() => {
@@ -162,11 +163,51 @@ const TourPackages = () => {
           .spinner-custom { width: 50px; height: 50px; border: 4px solid rgba(255, 183, 108, 0.3); border-top-color: #FFB76C; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
           @keyframes spin { 100% { transform: rotate(360deg); } }
 
+          /* --- CSS UNTUK POPUP PROFIL (DROPDOWN) --- */
+          .profile-dropdown-container { position: relative; }
+          .profile-popup {
+            position: absolute;
+            top: 130%;
+            right: 0;
+            width: 280px;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            padding: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1050;
+            border: 1px solid rgba(0,0,0,0.05);
+          }
+          .profile-popup.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+          }
+          .profile-popup::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            background-color: #fff;
+            transform: rotate(45deg);
+            border-left: 1px solid rgba(0,0,0,0.05);
+            border-top: 1px solid rgba(0,0,0,0.05);
+          }
+          .profile-popup-avatar { width: 64px; height: 64px; border-radius: 50%; border: 3px solid #FFB76C; padding: 2px; }
+
           /* MOBILE RESPONSIVE */
           @media (max-width: 991px) {
             .packages-hero h1 { font-size: 2.2rem; }
             .filter-sidebar { position: relative; top: 0; margin-bottom: 30px; }
             .nav-actions-mobile { display: flex !important; flex-direction: column; position: absolute; top: 70px; left: 5vw; right: 5vw; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; gap: 15px !important; z-index: 1000; }
+            .profile-popup { right: 50%; transform: translateX(50%) translateY(-10px); }
+            .profile-popup.open { transform: translateX(50%) translateY(0); }
+            .profile-popup::before { right: 50%; transform: translateX(50%) rotate(45deg); }
           }
         `}
       </style>
@@ -182,12 +223,14 @@ const TourPackages = () => {
         </div>
       )}
 
-      {/* --- NAVBAR --- */}
+      {/* --- NAVBAR MODERN (SAMA SEPERTI HOME & ADA LINK BERANDA) --- */}
       <nav className="navbar py-2 fixed-top" style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.05)', zIndex: 999 }}>
         <div className="container-fluid px-4 px-lg-5 d-flex align-items-center">
-          <Link className="navbar-brand brand-text fs-3" style={{ color: '#111', letterSpacing: '-0.5px' }} to="/">
+          
+          <Link className="navbar-brand fw-bold fs-3" style={{ color: '#111', letterSpacing: '-0.5px' }} to="/">
             Ampatheia<span style={{ color: '#FFB76C' }}>.</span>
           </Link>
+
           <button 
             className="d-lg-none ms-auto" 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -197,14 +240,29 @@ const TourPackages = () => {
           </button>
 
           <div className={`align-items-center gap-4 ms-lg-auto d-lg-flex ${isMobileMenuOpen ? 'nav-actions-mobile' : 'd-none'}`}>
+            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/" onClick={() => setIsMobileMenuOpen(false)}>Beranda</Link>
             <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
-            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="#" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
+            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/destinasi" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
+            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/Blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
             
             {user ? (
-              <div className="d-flex align-items-center gap-3">
-                <span className="fw-bold text-dark fs-6">Halo, <span style={{ color: '#FFB76C' }}>{user.name.split(' ')[0]}</span>!</span>
-                <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-medium">Keluar</button>
-              </div>
+              <Link 
+                className="d-flex align-items-center gap-2 px-3 py-1 shadow-sm text-decoration-none" 
+                style={{ backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '50px', transition: 'all 0.3s', zIndex: 1041 }}
+                to="/profile"
+                onClick={() => setIsMobileMenuOpen(false)}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+              >
+                <span className="fw-bold text-dark fs-6 d-none d-md-block" style={{ fontSize: '0.9rem' }}>
+                  Halo, <span style={{ color: '#FFB76C' }}>{user.name.split(' ')[0]}</span>
+                </span>
+                <img 
+                  src={`https://ui-avatars.com/api/?name=${user.name}&background=FFB76C&color=000&bold=true`} 
+                  alt="Profile" 
+                  style={{ width: '32px', height: '32px', borderRadius: '50%' }} 
+                />
+              </Link>
             ) : (
               <>
                 <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/login" onClick={() => setIsMobileMenuOpen(false)}>Masuk</Link>
@@ -212,6 +270,7 @@ const TourPackages = () => {
               </>
             )}
           </div>
+
         </div>
       </nav>
 
@@ -303,7 +362,6 @@ const TourPackages = () => {
                     
                     {/* Gambar & Kategori Badge */}
                     <div className="pkg-img-wrap">
-                      {/* LOGIKA YANG DIPERBAIKI: Hanya tampil jika data kategori dari Admin ada */}
                       {pkg.category && (
                         <span className="pkg-badge">
                           {pkg.category}
@@ -375,7 +433,7 @@ const TourPackages = () => {
                 <ul className="list-unstyled small fw-medium text-dark" style={{ lineHeight: '2.5' }}>
                   <li><Link to="/" className="text-dark text-decoration-none nav-link-custom">Beranda</Link></li>
                   <li><Link to="/tour-packages" className="text-dark text-decoration-none nav-link-custom">Paket Wisata</Link></li>
-                  <li><Link to="#" className="text-dark text-decoration-none nav-link-custom">Blog</Link></li>
+                  <li><Link to="/Blog" className="text-dark text-decoration-none nav-link-custom">Blog</Link></li>
                 </ul>
               </div>
               <div className="col-lg-3 px-lg-3">
@@ -390,13 +448,15 @@ const TourPackages = () => {
                 <h5 className="fw-bold mb-4 text-dark brand-text">Ikuti Kami</h5>
                 <div className="d-flex flex-column align-items-center gap-3 small fw-medium text-dark mt-3">
                   <a href="#" className="text-dark text-decoration-none d-flex align-items-center gap-2">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.036 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/></svg></a>
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.036 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/></svg>
+                    ampatheia.id
+                  </a>
                   <a href="#" className="text-dark text-decoration-none d-flex align-items-center gap-2"><svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/></svg></a>
                 </div>
               </div>
-            </div>
-            <div className="text-center pt-5 mt-3">
-              <span className="small text-dark fw-medium">Copyright © 2026 Ampatheia. Hak cipta dilindungi</span>
+              <div className="text-center pt-5 mt-3">
+                <span className="small text-dark fw-medium">Copyright © 2026 Ampatheia. Hak cipta dilindungi</span>
+              </div>
             </div>
           </div>
         </footer>

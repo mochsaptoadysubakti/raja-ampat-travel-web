@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getBlogs, addBlog, updateBlog, deleteBlog } = require('../controllers/blogController');
+const { getBlogs, getBlogById, addBlog, updateBlog, deleteBlog } = require('../controllers/blogController');
 
 router.get('/', getBlogs);
+router.get('/:id', getBlogById); // <--- INI PENTING
 router.post('/', addBlog);
 router.put('/:id', updateBlog);
 router.delete('/:id', deleteBlog);

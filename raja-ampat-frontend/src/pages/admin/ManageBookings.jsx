@@ -13,6 +13,10 @@ const ManageBookings = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState(null);
 
+  // State untuk Modal Detail Pesanan
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+
   const token = localStorage.getItem('adminToken');
   const config = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -20,7 +24,6 @@ const ManageBookings = () => {
     setIsLoading(true);
     try {
       const response = await axios.get('http://localhost:5000/api/bookings', config);
-      // PERBAIKAN 1: Hapus .data ekstra karena backend langsung me-return array
       const fetchedData = response.data; 
       setBookings(Array.isArray(fetchedData) ? fetchedData : []);
     } catch (error) {
@@ -35,11 +38,11 @@ const ManageBookings = () => {
     fetchBookings();
   }, [navigate]);
 
-  // Fungsi untuk mengubah status pesanan langsung dari dropdown
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/bookings/${id}/status`, { status: newStatus }, config);
-      // Update state lokal agar tabel langsung berubah tanpa perlu refresh
+      // PERBAIKAN: Hapus kata "/status" di ujung URL
+      await axios.put(`http://localhost:5000/api/bookings/${id}`, { status: newStatus }, config);
+      
       setBookings(bookings.map(b => b.id === id ? { ...b, status: newStatus } : b));
     } catch (error) {
       alert("Gagal merubah status: " + (error.response?.data?.error || error.message));
@@ -63,31 +66,57 @@ const ManageBookings = () => {
     }
   };
 
+  const showBookingDetails = (booking) => {
+    setSelectedBooking(booking);
+    setShowDetailModal(true);
+  };
+
+  // Fungsi untuk generate link WhatsApp dengan teks otomatis
+  const getWhatsAppLink = (phone, bookingId, customerName, packageName) => {
+    if (!phone) return '#';
+    
+    // Bersihkan karakter selain angka
+    let cleanedPhone = phone.replace(/\D/g, '');
+    
+    // Ubah format '08' jadi '628'
+    if (cleanedPhone.startsWith('0')) {
+      cleanedPhone = '62' + cleanedPhone.substring(1);
+    }
+
+    const message = `Halo Kak ${customerName},\n\nKami dari pihak Admin ingin mengonfirmasi pesanan tour Anda dengan kode *#${bookingId}* untuk paket *${packageName}*.\n\nApakah seluruh data yang diisi sudah sesuai? Terima kasih.`;
+    
+    return `https://wa.me/${cleanedPhone}?text=${encodeURIComponent(message)}`;
+  };
+
   const theme = { bgApp: '#f5f5f9', primary: '#696cff', cardShadow: '0 2px 6px 0 rgba(67, 89, 113, 0.12)' };
 
-  // Fungsi untuk memberi warna pada status
   const getStatusBadge = (status) => {
     const s = status ? status.toLowerCase() : '';
     if (s === 'confirmed' || s === 'success') return 'bg-label-success text-success';
     if (s === 'cancelled' || s === 'failed') return 'bg-label-danger text-danger';
-    return 'bg-label-warning text-warning'; // Default pending
+    return 'bg-label-warning text-warning'; 
   };
 
   return (
     <>
       <style>
         {`
-          .sneat-main { margin-left: 260px; padding: 20px; min-height: 100vh; }
+          .sneat-main { margin-left: 260px; padding: 20px; min-height: 100vh; background-color: ${theme.bgApp}; }
           .sneat-card { background: white; border-radius: 8px; border: none; box-shadow: ${theme.cardShadow}; }
           .table-custom th { background-color: #f8f9fa; color: #566a7f; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
           .bg-label-success { background-color: #e8fadf; padding: 5px 10px; border-radius: 5px; font-weight: 600; font-size: 0.8rem; }
           .bg-label-warning { background-color: #fff2d6; padding: 5px 10px; border-radius: 5px; font-weight: 600; font-size: 0.8rem; }
           .bg-label-danger { background-color: #ffe0db; padding: 5px 10px; border-radius: 5px; font-weight: 600; font-size: 0.8rem; }
           
-          /* Modal Styles Sama Seperti Manage Packages */
+          /* Modals Custom Styles */
           .modal-backdrop-custom { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(67, 89, 113, 0.5); backdrop-filter: blur(2px); display: flex; justify-content: center; align-items: center; z-index: 1050; }
           .modal-box-custom { background: white; padding: 30px; border-radius: 12px; width: 400px; text-align: center; animation: slideDown 0.3s ease-out; }
+          .modal-detail-box { width: 500px; text-align: left; }
           @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+          /* Custom Hover Link untuk Nama Pelanggan */
+          .clickable-name { cursor: pointer; transition: 0.2s; text-decoration-line: underline; text-decoration-style: dashed; text-decoration-color: transparent; }
+          .clickable-name:hover { text-decoration-color: ${theme.primary}; opacity: 0.8; }
         `}
       </style>
 
@@ -101,6 +130,66 @@ const ManageBookings = () => {
             <div className="d-flex justify-content-center gap-3">
               <button className="btn btn-outline-secondary px-4" onClick={() => setShowDeleteModal(false)}>Batal</button>
               <button className="btn btn-danger px-4" onClick={executeDelete}>Ya, Hapus!</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pop-up Detail Pesanan */}
+      {showDetailModal && selectedBooking && (
+        <div className="modal-backdrop-custom" onClick={() => setShowDetailModal(false)}>
+          <div className="modal-box-custom modal-detail-box" onClick={(e) => e.stopPropagation()}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="fw-bold m-0" style={{ color: '#566a7f' }}>Detail Pemesanan #{selectedBooking.id}</h5>
+              <button type="button" className="btn-close" onClick={() => setShowDetailModal(false)}></button>
+            </div>
+            
+            <hr />
+
+            <div className="row mb-3">
+              <div className="col-12">
+                <h6 className="fw-bold text-primary mb-2"><i className="bi bi-person-badge"></i> Data Pelanggan</h6>
+                <p className="mb-1"><strong>Nama:</strong> {selectedBooking.user_name || 'Tanpa Nama'}</p>
+                <p className="mb-1"><strong>Email:</strong> {selectedBooking.user_email || '-'}</p>
+                <p className="mb-1"><strong>No. Telepon:</strong> {selectedBooking.user_phone || '-'}</p>
+              </div>
+            </div>
+
+            <div className="row mb-4">
+              <div className="col-12">
+                <h6 className="fw-bold text-primary mb-2"><i className="bi bi-bag-check"></i> Detail Pesanan</h6>
+                <p className="mb-1"><strong>Paket:</strong> {selectedBooking.package_name || '-'}</p>
+                <p className="mb-1">
+                  <strong>Tanggal Pesan:</strong> {selectedBooking.booking_date ? new Date(selectedBooking.booking_date).toLocaleDateString('id-ID') : '-'}
+                </p>
+                <p className="mb-1"><strong>Total Harga:</strong> Rp {parseInt(selectedBooking.total_price || 0).toLocaleString('id-ID')}</p>
+                <p className="mb-1 d-flex align-items-center gap-2">
+                  <strong>Status:</strong> 
+                  <span className={`badge ${getStatusBadge(selectedBooking.status)}`}>
+                    {selectedBooking.status ? selectedBooking.status.toUpperCase() : 'PENDING'}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Tombol Hubungi WhatsApp */}
+            <div className="d-flex justify-content-end gap-2">
+              {selectedBooking.user_phone && selectedBooking.user_phone !== '-' && (
+                <a 
+                  href={getWhatsAppLink(
+                    selectedBooking.user_phone, 
+                    selectedBooking.id, 
+                    selectedBooking.user_name, 
+                    selectedBooking.package_name
+                  )}
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="btn btn-success px-3 d-flex align-items-center gap-2"
+                >
+                  <i className="bi bi-whatsapp"></i> Hubungi via WhatsApp
+                </a>
+              )}
+              <button className="btn btn-secondary px-4" onClick={() => setShowDetailModal(false)}>Tutup</button>
             </div>
           </div>
         </div>
@@ -137,13 +226,19 @@ const ManageBookings = () => {
                       <tr key={booking.id}>
                         <td className="ps-4 fw-bold">#{booking.id}</td>
                         
-                        {/* PERBAIKAN 2: Sesuaikan nama variabel dengan output SQL Backend */}
-                        <td className="fw-bold" style={{ color: theme.primary }}>{booking.user_name || 'Tanpa Nama'}</td>
+                        <td 
+                          className="fw-bold clickable-name" 
+                          style={{ color: theme.primary }}
+                          onClick={() => showBookingDetails(booking)}
+                          title="Klik untuk melihat detail"
+                        >
+                          {booking.user_name || 'Tanpa Nama'} <i className="bi bi-box-arrow-up-right ms-1" style={{ fontSize: '0.75rem' }}></i>
+                        </td>
+                        
                         <td>{booking.package_name || '-'}</td>
                         
                         <td className="fw-semibold">Rp {parseInt(booking.total_price || 0).toLocaleString('id-ID')}</td>
                         <td>
-                          {/* Dropdown untuk mengubah status langsung dari tabel */}
                           <select 
                             className={`form-select form-select-sm shadow-none border-0 ${getStatusBadge(booking.status)}`}
                             value={booking.status || 'pending'}

@@ -27,4 +27,9 @@ const deleteBlog = async (id) => {
     return result.rows[0];
 };
 
-module.exports = { getAllBlogs, createBlog, updateBlog, deleteBlog };
+const getBlogById = async (id) => {
+    const result = await pool.query('SELECT * FROM blogs WHERE id = $1', [id]);
+    return result.rows[0];
+};
+
+module.exports = { getAllBlogs, getBlogById, createBlog, updateBlog, deleteBlog };

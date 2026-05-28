@@ -16,9 +16,10 @@ const TourDetail = () => {
   const [error, setError] = useState("");
   
   // --- UI STATE ---
-  const [activeTab, setActiveTab] = useState('itinerary'); // Set default ke Itinerary
+  const [activeTab, setActiveTab] = useState('deskripsi'); 
   const [currentImgIndex, setCurrentImgIndex] = useState(0); 
   const [pax, setPax] = useState(1); 
+  const [bookingDate, setBookingDate] = useState(""); // State untuk tanggal
   const [user, setUser] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -77,9 +78,33 @@ const TourDetail = () => {
 
   }, [id, pkgDetail]);
 
+  // =======================================================
+  // --- PERUBAHAN LOGIKA BOOKING ---
+  // =======================================================
   const handleBooking = () => {
-    alert(`Mengarahkan ke pemesanan paket:\n${title}\nJumlah: ${pax} Orang\nTotal: Rp ${totalPrice.toLocaleString('id-ID')}`);
+    // 1. Validasi Tanggal
+    if (!bookingDate) {
+        alert("Silakan pilih tanggal keberangkatan terlebih dahulu!");
+        return;
+    }
+    
+    // 2. Pastikan ID Paket tersedia
+    const packageId = id || pkgDetail?.id;
+    if (!packageId) {
+        alert("Terjadi kesalahan, ID Paket tidak ditemukan.");
+        return;
+    }
+
+    // 3. Pindah ke halaman detail booking dengan membawa data (state)
+    navigate(`/booking/${packageId}`, {
+        state: {
+            selectedDate: bookingDate,
+            totalPax: pax,
+            packageData: pkgDetail
+        }
+    });
   };
+  // =======================================================
 
   const handleLogout = () => {
     localStorage.removeItem('userToken');
@@ -98,15 +123,35 @@ const TourDetail = () => {
     );
   }
 
-  // --- DATA PAKET ---
+  // --- DATA PAKET UMUM ---
   const title = pkgDetail?.title || pkgDetail?.nama_paket || "Detail Paket";
   const duration = pkgDetail?.duration || pkgDetail?.durasi || "-";
   const price = Number(pkgDetail?.price || pkgDetail?.harga || 0);
-  const description = pkgDetail?.description || pkgDetail?.deskripsi || pkgDetail?.fasilitas || "Tidak ada deskripsi.";
   const category = pkgDetail?.category || pkgDetail?.kategori || "Premium";
   const coverImage = pkgDetail?.image_url || pkgDetail?.image || pkgDetail?.url || pkgDetail?.foto || pkgDetail?.link_foto || "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/4edd24f0-cd5b-4271-a94e-add9f4430f2a";
 
-  // --- LOGIKA MENCARI GAMBAR DESTINASI UNTUK GALERI ---
+  // --- PARSING DESKRIPSI & FASILITAS ---
+  const rawDescription = pkgDetail?.description || pkgDetail?.deskripsi || "Tidak ada deskripsi.";
+  let cleanDesc = rawDescription;
+  let includedList = [];
+  let excludedList = [];
+
+  if (rawDescription.includes("---DESKRIPSI---")) {
+    try {
+      const parts = rawDescription.split("---INCLUDED---");
+      cleanDesc = parts[0].replace("---DESKRIPSI---\n", "").replace("---DESKRIPSI---", "").trim();
+      
+      if (parts[1]) {
+        const subParts = parts[1].split("---EXCLUDED---");
+        includedList = subParts[0].trim().split("\n").filter(line => line.trim() !== "");
+        excludedList = subParts[1] ? subParts[1].trim().split("\n").filter(line => line.trim() !== "") : [];
+      }
+    } catch (e) {
+      console.error("Gagal parsing tag fasilitas:", e);
+    }
+  }
+
+  // --- BAGIAN ITINERARY ---
   const processedItinerary = itineraryList.map((it, index) => {
     const nestedDest = it.destination || it.destinasi || {};
     let destName = nestedDest.name || nestedDest.nama || nestedDest.nama_destinasi || 
@@ -145,7 +190,7 @@ const TourDetail = () => {
   const nextImg = () => setCurrentImgIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1));
   const prevImg = () => setCurrentImgIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1));
 
-  // --- LOGIKA BOOKING ---
+  // --- LOGIKA HARGA & JUMLAH ORANG ---
   const totalPrice = price * pax;
   const increasePax = () => setPax(prev => prev + 1);
   const decreasePax = () => setPax(prev => (prev > 1 ? prev - 1 : 1));
@@ -178,6 +223,11 @@ const TourDetail = () => {
           
           .counter-btn { background: #F9FAFB; border: 1px solid #E5E7EB; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
           .counter-input { width: 60px; text-align: center; border: 1px solid #E5E7EB; border-left: none; border-right: none; font-weight: 600; background: #fff; }
+
+          .facility-list { list-style: none; padding: 0; margin: 0; }
+          .facility-list li { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 0.95rem; color: #4A5568; line-height: 1.5; }
+          .icon-inc { color: #2ecc71; font-weight: bold; font-size: 1.1rem; }
+          .icon-exc { color: #e74c3c; font-weight: bold; font-size: 1.1rem; }
 
           @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
           .anim-fade-up { animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
@@ -247,20 +297,22 @@ const TourDetail = () => {
               </div>
             </div>
 
-            {/* 3. TABS */}
+            {/* 3. TABS MENU */}
             <div className="tab-container mt-4">
-              <div className={`tab-item ${activeTab === 'deskripsi' ? 'active' : ''}`} onClick={() => setActiveTab('deskripsi')}>Deskripsi & Fasilitas</div>
+              <div className={`tab-item ${activeTab === 'deskripsi' ? 'active' : ''}`} onClick={() => setActiveTab('deskripsi')}>Deskripsi</div>
               <div className={`tab-item ${activeTab === 'itinerary' ? 'active' : ''}`} onClick={() => setActiveTab('itinerary')}>Itinerary</div>
+              <div className={`tab-item ${activeTab === 'fasilitas' ? 'active' : ''}`} onClick={() => setActiveTab('fasilitas')}>Fasilitas</div>
             </div>
 
-            {/* KONTEN TAB */}
+            {/* KONTEN TAB: DESKRIPSI */}
             {activeTab === 'deskripsi' && (
               <div className="anim-fade-up pt-2">
                 <h4 className="fw-bold mb-3 text-dark">Tentang Paket Wisata</h4>
-                <p className="text-secondary" style={{ whiteSpace: 'pre-line', lineHeight: '1.8' }}>{description}</p>
+                <p className="text-secondary" style={{ whiteSpace: 'pre-line', lineHeight: '1.8' }}>{cleanDesc}</p>
               </div>
             )}
 
+            {/* KONTEN TAB: ITINERARY */}
             {activeTab === 'itinerary' && (
               <div className="anim-fade-up pt-2">
                 <h4 className="fw-bold mb-4 text-dark">Rencana Perjalanan</h4>
@@ -274,7 +326,6 @@ const TourDetail = () => {
                       </div>
                       <div className="flex-grow-1">
                         <h5 className="fw-bold mb-2 text-dark">Hari {item.day}: {item.name}</h5>
-                        {/* KUNCI PERBAIKANNYA ADA DI SINI: whiteSpace: 'pre-line' */}
                         <p className="text-secondary mb-0" style={{ whiteSpace: 'pre-line', lineHeight: '1.8' }}>
                           {item.activity}
                         </p>
@@ -284,6 +335,52 @@ const TourDetail = () => {
                 ) : (
                   <p className="text-muted fst-italic">Jadwal perjalanan belum tersedia.</p>
                 )}
+              </div>
+            )}
+
+            {/* KONTEN TAB: FASILITAS */}
+            {activeTab === 'fasilitas' && (
+              <div className="anim-fade-up pt-2">
+                <h4 className="fw-bold mb-4 text-dark">Fasilitas & Layanan Tour</h4>
+                <div className="row g-4">
+                  
+                  {/* Kolom Kiri: Yang Termasuk */}
+                  <div className="col-md-6">
+                    <div className="p-4 rounded-3 h-100" style={{ backgroundColor: '#F0FFF4', border: '1px solid #C6F6D5' }}>
+                      <h5 className="fw-bold mb-3" style={{ color: '#22543D' }}>Yang Termasuk</h5>
+                      <ul className="facility-list">
+                        {includedList.length > 0 ? (
+                          includedList.map((item, idx) => (
+                            <li key={idx}>
+                              <span className="icon-inc">✓</span> <span>{item}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-muted fst-italic">Data fasilitas tidak tersedia.</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Kolom Kanan: Yang Tidak Termasuk */}
+                  <div className="col-md-6">
+                    <div className="p-4 rounded-3 h-100" style={{ backgroundColor: '#FFF5F5', border: '1px solid #FED7D7' }}>
+                      <h5 className="fw-bold mb-3" style={{ color: '#742A2A' }}>Yang Tidak Termasuk</h5>
+                      <ul className="facility-list">
+                        {excludedList.length > 0 ? (
+                          excludedList.map((item, idx) => (
+                            <li key={idx}>
+                              <span className="icon-exc">✕</span> <span>{item}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-muted fst-italic">Data pengecualian tidak tersedia.</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+
+                </div>
               </div>
             )}
           </div>
@@ -296,7 +393,13 @@ const TourDetail = () => {
               
               <div className="mb-4">
                 <label className="fw-semibold text-dark small mb-2 d-flex align-items-center gap-2">🗓 Pilih Tanggal</label>
-                <input type="date" className="form-control bg-white py-2 border" style={{ borderRadius: '8px' }} />
+                <input 
+                  type="date" 
+                  className="form-control bg-white py-2 border" 
+                  style={{ borderRadius: '8px' }} 
+                  value={bookingDate}
+                  onChange={(e) => setBookingDate(e.target.value)}
+                />
               </div>
 
               <div className="mb-4">
@@ -319,7 +422,7 @@ const TourDetail = () => {
                 </div>
               </div>
 
-              <button className="btn w-100 py-3 rounded-3 fw-bold text-white fs-5 border-0" style={{ backgroundColor: '#FF6B2C' }} onClick={handleBooking}>
+              <button type="button" className="btn w-100 py-3 rounded-3 fw-bold text-white fs-5 border-0" style={{ backgroundColor: '#FF6B2C' }} onClick={handleBooking}>
                 Pesan Sekarang
               </button>
               <p className="text-center text-muted small mt-3 mb-0" style={{ fontSize: '0.75rem' }}>Gratis pembatalan hingga 7 hari sebelum keberangkatan.</p>

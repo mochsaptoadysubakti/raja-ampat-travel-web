@@ -10,11 +10,25 @@ const getPackages = async (req, res) => {
 };
 
 const addPackage = async (req, res) => {
-    // Tangkap data category dari req.body
-    const { title, price, duration, image_url, description, is_available, is_featured, category, itinerary } = req.body;
+    // PERBAIKAN: Tangkap data included dan excluded yang dikirim dari frontend
+    const { 
+        title, price, duration, image_url, description, 
+        is_available, is_featured, category, itinerary, 
+        included, excluded 
+    } = req.body;
+
     try {
-        // Kirim category ke model
-        const newPkg = await Package.createPackage(title, price, duration, image_url, description, is_available, is_featured, category, itinerary);
+        // Trik: Ubah array included & excluded menjadi string JSON agar tipenya COCOK dengan database TEXT/VARCHAR
+        const stringIncluded = included ? JSON.stringify(included) : JSON.stringify([]);
+        const stringExcluded = excluded ? JSON.stringify(excluded) : JSON.stringify([]);
+
+        // PERBAIKAN: Teruskan stringIncluded dan stringExcluded ke fungsi di model kamu
+        const newPkg = await Package.createPackage(
+            title, price, duration, image_url, description, 
+            is_available, is_featured, category, itinerary, 
+            stringIncluded, stringExcluded
+        );
+
         res.status(201).json({ status: "success", data: newPkg });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -22,11 +36,25 @@ const addPackage = async (req, res) => {
 };
 
 const updatePackage = async (req, res) => {
-    // Tangkap data category dari req.body
-    const { title, price, duration, image_url, description, is_available, is_featured, category, itinerary } = req.body;
+    // PERBAIKAN: Tangkap data included dan excluded yang dikirim dari frontend saat proses edit
+    const { 
+        title, price, duration, image_url, description, 
+        is_available, is_featured, category, itinerary, 
+        included, excluded 
+    } = req.body;
+
     try {
-        // Kirim category ke model
-        const updatedPkg = await Package.updatePackage(req.params.id, title, price, duration, image_url, description, is_available, is_featured, category, itinerary);
+        // Trik: Ubah array menjadi string JSON untuk update ke DB
+        const stringIncluded = included ? JSON.stringify(included) : JSON.stringify([]);
+        const stringExcluded = excluded ? JSON.stringify(excluded) : JSON.stringify([]);
+
+        // PERBAIKAN: Teruskan stringIncluded dan stringExcluded ke fungsi updatePackage di model kamu
+        const updatedPkg = await Package.updatePackage(
+            req.params.id, title, price, duration, image_url, description, 
+            is_available, is_featured, category, itinerary, 
+            stringIncluded, stringExcluded
+        );
+
         res.status(200).json({ status: "success", data: updatedPkg });
     } catch (error) {
         res.status(500).json({ error: error.message });
