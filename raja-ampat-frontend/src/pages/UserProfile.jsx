@@ -11,10 +11,8 @@ const UserProfile = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutAnim, setShowLogoutAnim] = useState(false);
   
-  // --- TAMBAHAN ANIMASI: State untuk animasi sukses ---
+  // --- STATE ANIMASI & EDIT PROFIL ---
   const [showSuccessAnim, setShowSuccessAnim] = useState(false);
-
-  // --- STATE EDIT PROFIL ---
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
@@ -37,11 +35,9 @@ const UserProfile = () => {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
       
-      // Set nilai awal untuk form edit
       setEditName(parsedUser.name || "");
       setEditPhone(parsedUser.phone || parsedUser.no_hp || "");
       
-      // Ambil data riwayat pesanan
       fetchBookingHistory(parsedUser.id, token);
     }
   }, [navigate]);
@@ -71,7 +67,6 @@ const UserProfile = () => {
     setIsSaving(true);
     try {
       const token = localStorage.getItem('userToken');
-      
       const payload = {
         name: editName,
         phone: editPhone,
@@ -87,10 +82,7 @@ const UserProfile = () => {
       setUser(updatedUser);
       localStorage.setItem('userData', JSON.stringify(updatedUser));
 
-      // --- TAMBAHAN ANIMASI: Tampilkan animasi sukses alih-alih alert ---
       setShowSuccessAnim(true);
-      
-      // Sembunyikan animasi dan tutup mode edit setelah 2 detik
       setTimeout(() => {
         setShowSuccessAnim(false);
         setIsEditing(false);
@@ -100,8 +92,7 @@ const UserProfile = () => {
       console.error("Detail Error Update Profil:", error.response || error);
       const errorMsg = error.response?.data?.message 
                     || error.response?.data?.error 
-                    || "Pastikan server backend berjalan dan rute PUT /api/users/:id tersedia.";
-                    
+                    || "Gagal menyimpan perubahan.";
       alert(`Gagal menyimpan: ${errorMsg}`);
     } finally {
       setIsSaving(false);
@@ -123,11 +114,26 @@ const UserProfile = () => {
   const getStatusDisplay = (status) => {
     const statusLower = (status || '').toLowerCase();
     if (statusLower.includes('confirmed') || statusLower.includes('lunas') || statusLower.includes('success')) {
-      return { class: 'status-lunas', label: 'Terkonfirmasi' };
+      return { 
+        badgeClass: 'badge-confirmed', 
+        label: 'Terkonfirmasi', 
+        icon: 'bi-check-circle',
+        btnClass: 'btn-outline-confirmed'
+      };
     } else if (statusLower.includes('cancel') || statusLower.includes('batal')) {
-      return { class: 'status-batal', label: 'Dibatalkan' };
+      return { 
+        badgeClass: 'badge-cancelled', 
+        label: 'Dibatalkan', 
+        icon: 'bi-x-circle',
+        btnClass: 'btn-outline-secondary'
+      };
     }
-    return { class: 'status-pending', label: status || 'Menunggu Konfirmasi' };
+    return { 
+      badgeClass: 'badge-pending', 
+      label: 'Pending', 
+      icon: 'bi-clock',
+      btnClass: 'btn-outline-pending'
+    };
   };
 
   if (!user) return null;
@@ -141,26 +147,22 @@ const UserProfile = () => {
           body { font-family: 'Inter', sans-serif; background-color: #F4F7FE; }
           h1, h2, h3, h4, h5, h6, .brand-text { font-family: 'Poppins', sans-serif; }
 
-          /* NAVBAR CUSTOM */
           .nav-link-custom { transition: color 0.3s ease; color: #555; }
           .nav-link-custom:hover { color: #000 !important; }
 
-          /* MODAL STYLING */
           .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1050; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.3s forwards;}
           .modal-content-small { background-color: #fff; border-radius: 20px; max-width: 400px; width: 100%; padding: 40px 20px; text-align: center; }
           .modal-content-large { background-color: #fff; border-radius: 24px; max-width: 500px; width: 100%; padding: 30px; text-align: left; box-shadow: 0 25px 50px rgba(0,0,0,0.15); animation: scaleUp 0.3s forwards; overflow-y: auto; max-height: 90vh; }
           
           .spinner-custom { width: 50px; height: 50px; border: 4px solid rgba(255, 183, 108, 0.3); border-top-color: #FFB76C; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
           
-          /* --- TAMBAHAN ANIMASI: CSS untuk Icon Sukses --- */
           .success-checkmark { width: 60px; height: 60px; border-radius: 50%; background-color: #10B981; color: white; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; margin: 0 auto 20px auto; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
 
           @keyframes spin { 100% { transform: rotate(360deg); } }
           @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
           @keyframes scaleUp { from { transform: scale(0.95); } to { transform: scale(1); } }
-          @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } /* --- TAMBAHAN ANIMASI --- */
+          @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-          /* SIDEBAR MENU PROFIL */
           .profile-sidebar { background: #fff; border-radius: 20px; padding: 30px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
           .profile-avatar-container { text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 20px; }
           .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #F4F7FE; box-shadow: 0 5px 15px rgba(255, 183, 108, 0.3); margin-bottom: 15px; }
@@ -171,32 +173,44 @@ const UserProfile = () => {
           .profile-menu-item.logout { color: #E53E3E; margin-top: 20px; }
           .profile-menu-item.logout:hover { background-color: #FFF5F5; }
 
-          /* KONTEN UTAMA PROFIL */
           .profile-content-card { background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); min-height: 500px; }
           .section-title { font-weight: 700; color: #111; margin-bottom: 30px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
           
-          /* FORM STYLING */
           .form-label-custom { font-weight: 600; color: #475569; font-size: 0.9rem; margin-bottom: 8px; display: block; }
           .form-control-custom { background-color: #F8F9FA; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; font-size: 0.95rem; color: #111; transition: all 0.3s; width: 100%; }
           .form-control-custom:read-only { background-color: #E2E8F0; color: #64748B; cursor: not-allowed; }
           .form-control-custom:not(:read-only) { background-color: #fff; border-color: #FFB76C; box-shadow: 0 0 0 3px rgba(255, 183, 108, 0.1); }
 
           .btn-primary-custom { background-color: #111; color: #fff; font-weight: 700; border-radius: 12px; padding: 14px 30px; border: none; transition: all 0.3s; width: 100%; }
-          .btn-primary-custom:hover { background-color: #FFB76C; color: #111; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 183, 108, 0.3); }
+          .btn-primary-custom:hover { background-color: #FFB76C; color: #111; }
 
-          /* TOMBOL EDIT & SIMPAN */
           .btn-outline-custom { border: 1px solid #111; color: #111; font-weight: 600; border-radius: 8px; padding: 8px 16px; background: transparent; transition: all 0.3s; font-size: 0.9rem; }
           .btn-outline-custom:hover { background: #111; color: #fff; }
           .btn-save-custom { background-color: #111; color: #fff; font-weight: 600; border-radius: 8px; padding: 8px 24px; border: none; transition: all 0.3s; font-size: 0.9rem; }
           .btn-save-custom:hover { background-color: #FFB76C; color: #111; }
 
-          /* TIKET RIWAYAT PESANAN */
-          .history-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 25px; margin-bottom: 20px; transition: all 0.3s; cursor: pointer; }
-          .history-card:hover { border-color: #FFB76C; box-shadow: 0 10px 25px rgba(255, 183, 108, 0.15); transform: translateY(-3px); }
-          .status-badge { padding: 6px 16px; border-radius: 30px; font-weight: 700; font-size: 0.8rem; }
-          .status-lunas { background-color: #D1FAE5; color: #22543D; }
-          .status-pending { background-color: #FEF3C7; color: #92400E; }
-          .status-batal { background-color: #FEE2E2; color: #991B1B; }
+          /* --- STYLING TIKET RIWAYAT PESANAN BARU --- */
+          .history-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; margin-bottom: 24px; transition: all 0.3s; display: flex; gap: 24px; }
+          .history-card:hover { border-color: #FFB76C; box-shadow: 0 10px 25px rgba(255, 183, 108, 0.15); }
+          
+          .history-img-container { width: 240px; height: 180px; flex-shrink: 0; position: relative; border-radius: 12px; overflow: hidden; }
+          .history-img { width: 100%; height: 100%; object-fit: cover; }
+          .history-duration { position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; backdrop-filter: blur(4px); }
+          
+          .ticket-vertical-divider { width: 1px; background-color: #E2E8F0; height: 40px; margin: 0 20px; }
+          
+          .badge-pending { background-color: #FFF3E0; color: #F97316; padding: 6px 14px; border-radius: 30px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; }
+          .badge-confirmed { background-color: #D1FAE5; color: #10B981; padding: 6px 14px; border-radius: 30px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; }
+          .badge-cancelled { background-color: #FEE2E2; color: #EF4444; padding: 6px 14px; border-radius: 30px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; }
+
+          .btn-outline-pending { border: 1px solid #F97316; color: #F97316; background: transparent; border-radius: 8px; font-weight: 600; padding: 8px 16px; width: 100%; transition: 0.3s; font-size: 0.9rem; }
+          .btn-outline-pending:hover { background: #F97316; color: white; }
+          
+          .btn-outline-confirmed { border: 1px solid #10B981; color: #10B981; background: transparent; border-radius: 8px; font-weight: 600; padding: 8px 16px; width: 100%; transition: 0.3s; font-size: 0.9rem; }
+          .btn-outline-confirmed:hover { background: #10B981; color: white; }
+
+          .btn-outline-download { border: 1px solid #CBD5E1; color: #475569; background: transparent; border-radius: 8px; font-weight: 600; padding: 8px 16px; width: 100%; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; }
+          .btn-outline-download:hover { background: #F8F9FA; color: #0F172A; }
 
           .btn-close-custom { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; transition: 0.2s;}
           .btn-close-custom:hover { background: #e2e8f0; color: #e53e3e; }
@@ -209,12 +223,16 @@ const UserProfile = () => {
 
           @media (max-width: 991px) {
             .profile-content-card { padding: 25px; margin-top: 20px; }
-            .nav-actions-mobile { display: flex !important; flex-direction: column; position: absolute; top: 70px; left: 5vw; right: 5vw; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; gap: 15px !important; z-index: 1000; }
+            .history-card { flex-direction: column; }
+            .history-img-container { width: 100%; height: 200px; }
+            .ticket-vertical-divider { display: none; }
+            .ticket-details-mobile { flex-direction: column; gap: 15px; margin-top: 15px;}
+            .history-action-area { align-items: flex-start !important; margin-top: 10px; border-top: 1px solid #E2E8F0; padding-top: 15px;}
           }
         `}
       </style>
 
-      {/* --- TAMBAHAN ANIMASI: POPUP SUKSES UPDATE PROFIL --- */}
+      {/* --- POPUPS --- */}
       {showSuccessAnim && (
         <div className="modal-overlay" style={{ zIndex: 10000 }}>
           <div className="modal-content-small" style={{ animation: 'scaleUp 0.3s forwards' }}>
@@ -225,7 +243,6 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* --- POPUP LOGOUT --- */}
       {showLogoutAnim && (
         <div className="modal-overlay" style={{ zIndex: 9999 }}>
           <div className="modal-content-small">
@@ -236,7 +253,6 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* --- POPUP DETAIL PESANAN --- */}
       {selectedBooking && (
         <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={() => setSelectedBooking(null)}>
           <div className="modal-content-large" onClick={(e) => e.stopPropagation()}>
@@ -246,10 +262,10 @@ const UserProfile = () => {
             </div>
             
             <div className="p-3 bg-light rounded-3 mb-4 border">
-              <span className={`status-badge ${getStatusDisplay(selectedBooking.status).class} d-inline-block mb-2`}>
-                Status: {getStatusDisplay(selectedBooking.status).label}
+              <span className={`${getStatusDisplay(selectedBooking.status).badgeClass} mb-2`}>
+                 <i className={`bi ${getStatusDisplay(selectedBooking.status).icon}`}></i> {getStatusDisplay(selectedBooking.status).label}
               </span>
-              <div className="text-muted small">ID Transaksi: <strong>{selectedBooking.id || selectedBooking.booking_id || `TRX-${selectedBooking.id}`}</strong></div>
+              <div className="text-muted small mt-2">ID Transaksi: <strong>{selectedBooking.id || selectedBooking.booking_id || `TRX-${selectedBooking.id}`}</strong></div>
             </div>
 
             <h6 className="fw-bold text-secondary text-uppercase small mb-3">Data Diri Pemesan</h6>
@@ -276,7 +292,7 @@ const UserProfile = () => {
               </div>
               <div className="d-flex justify-content-between mb-2 border-bottom pb-2">
                 <span className="text-muted">Tanggal Keberangkatan</span>
-                <span className="fw-medium text-dark text-end">{selectedBooking.booking_date ? new Date(selectedBooking.booking_date).toLocaleDateString('id-ID') : "-"}</span>
+                <span className="fw-medium text-dark text-end">{selectedBooking.booking_date ? new Date(selectedBooking.booking_date).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : "-"}</span>
               </div>
               <div className="d-flex justify-content-between mb-2 border-bottom pb-2">
                 <span className="text-muted">Jumlah Tamu</span>
@@ -289,7 +305,6 @@ const UserProfile = () => {
             </div>
 
             <div className="text-center mt-4">
-              <p className="text-muted small mb-2">Butuh bantuan konfirmasi pembayaran atau kendala?</p>
               <a 
                 href={`https://wa.me/6283189916740?text=Halo%20Admin%20Ampatheia,%20saya%20ingin%20bertanya%20terkait%20pesanan%20saya%20dengan%20ID:%20${selectedBooking.id || selectedBooking.booking_id}`} 
                 target="_blank" 
@@ -318,7 +333,6 @@ const UserProfile = () => {
             <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
             <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/destinasi" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
             
-            {/* Navigasi Profil */}
             <div className="d-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill border">
               <span className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>Halo, <span style={{ color: '#FFB76C' }}>{user.name.split(' ')[0]}</span></span>
               <img src={`https://ui-avatars.com/api/?name=${user.name}&background=FFB76C&color=000&bold=true`} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
@@ -327,11 +341,11 @@ const UserProfile = () => {
         </div>
       </nav>
 
-      {/* --- MAIN CONTENT PROFIL --- */}
+      {/* --- MAIN CONTENT --- */}
       <div className="container mt-4">
         <div className="row g-lg-5">
           
-          {/* KOLOM KIRI: SIDEBAR MENU */}
+          {/* SIDEBAR MENU */}
           <div className="col-lg-3">
             <div className="profile-sidebar anim-fade-up">
               <div className="profile-avatar-container">
@@ -354,17 +368,15 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* KOLOM KANAN: KONTEN DINAMIS */}
+          {/* KONTEN DINAMIS */}
           <div className="col-lg-9">
             
             {/* TAB 1: INFORMASI AKUN */}
             {activeTab === 'akun' && (
               <div className="profile-content-card anim-fade-up" style={{ animationDelay: '0.1s' }}>
-                
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <h3 className="section-title mb-0"><span style={{ color: '#FFB76C' }}>⚙️</span> Informasi Akun</h3>
                   
-                  {/* TOMBOL EDIT / SIMPAN */}
                   {!isEditing ? (
                     <button className="btn-outline-custom" onClick={() => setIsEditing(true)}>
                       <i className="bi bi-pencil-square me-1"></i> Edit Profil
@@ -416,8 +428,8 @@ const UserProfile = () => {
             {/* TAB 2: RIWAYAT PESANAN */}
             {activeTab === 'riwayat' && (
               <div className="profile-content-card anim-fade-up" style={{ animationDelay: '0.1s' }}>
-                <h3 className="section-title"><span style={{ color: '#FFB76C' }}>🧳</span> Riwayat Pesanan</h3>
-                <p className="text-muted small mb-4">Klik pada tiket pesanan untuk melihat detail lengkap.</p>
+                <h3 className="section-title"><span style={{ fontSize: '1.8rem' }}>🧳</span> Riwayat Pesanan</h3>
+                <p className="text-muted small mb-4">Berikut adalah daftar pesanan paket wisata Anda.</p>
                 
                 {isLoadingBookings ? (
                   <div className="text-center py-5">
@@ -428,43 +440,67 @@ const UserProfile = () => {
                   <div>
                     {bookings.map((booking, index) => {
                       const statusInfo = getStatusDisplay(booking.status);
+                      // Gunakan gambar dari database jika ada, jika tidak gunakan gambar default
+                      const imageUrl = booking.image || booking.tour_image || booking.thumbnail || "https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?auto=format&fit=crop&w=600&q=80";
 
                       return (
-                        <div 
-                          key={index} 
-                          className="history-card" 
-                          onClick={() => setSelectedBooking(booking)}
-                        >
-                          <div className="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
-                            <div>
-                              <span className="badge bg-light text-secondary border mb-2">
-                                ID: {booking.id || `TRX-${index}`}
-                              </span>
-                              <h5 className="fw-bold text-dark mb-1">
-                                {booking.tour_name || booking.title || "Paket Wisata"}
-                              </h5>
-                              <span className="text-muted small">
-                                <i className="bi bi-calendar-event me-1"></i> 
-                                Berangkat: {booking.booking_date ? new Date(booking.booking_date).toLocaleDateString('id-ID') : "-"}
-                              </span>
-                            </div>
-                            <div>
-                              <span className={`status-badge ${statusInfo.class}`}>
-                                {statusInfo.label}
-                              </span>
+                        <div key={index} className="history-card">
+                          
+                          {/* Gambar & Durasi */}
+                          <div className="history-img-container">
+                            <img src={imageUrl} alt={booking.tour_name} className="history-img" />
+                            <div className="history-duration">
+                              <i className="bi bi-clock"></i> {booking.duration || "3H2M"}
                             </div>
                           </div>
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div className="text-secondary fw-medium">
-                              <i className="bi bi-people-fill me-2"></i> {booking.total_people || 1} Orang
-                            </div>
-                            <div className="text-end">
-                              <p className="text-muted small mb-0">Total Harga</p>
-                              <h5 className="fw-bold mb-0" style={{ color: '#111' }}>
-                                Rp {Number(booking.total_price || 0).toLocaleString('id-ID')}
-                              </h5>
+
+                          {/* Detail Info Tengah */}
+                          <div className="flex-grow-1 py-1">
+                            <span className="badge bg-light text-secondary border mb-2 px-2 py-1" style={{ fontSize: '0.75rem'}}>ID: {booking.id || 20 + index}</span>
+                            <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem', lineHeight: '1.4' }}>
+                              {booking.tour_name || booking.title || "Paket Eksklusif Raja Ampat 3H2M"}
+                            </h5>
+                            
+                            <div className="d-flex align-items-center ticket-details-mobile">
+                              <div>
+                                <p className="text-muted small mb-1"><i className="bi bi-calendar3 me-1"></i> Tanggal Berangkat</p>
+                                <p className="fw-medium text-dark mb-0">
+                                  {booking.booking_date ? new Date(booking.booking_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric'}) : "-"}
+                                </p>
+                              </div>
+                              <div className="ticket-vertical-divider"></div>
+                              <div>
+                                <p className="text-muted small mb-1"><i className="bi bi-people me-1"></i> Jumlah Peserta</p>
+                                <p className="fw-medium text-dark mb-0">{booking.total_people || 1} Orang</p>
+                              </div>
                             </div>
                           </div>
+
+                          {/* Status, Harga, Actions Kanan */}
+                          <div className="history-action-area d-flex flex-column justify-content-between align-items-lg-end" style={{ minWidth: '180px' }}>
+                            <div className={statusInfo.badgeClass}>
+                              <i className={`bi ${statusInfo.icon}`}></i> {statusInfo.label}
+                            </div>
+                            
+                            <div className="text-lg-end w-100 mt-3 mb-3">
+                              <p className="text-muted small mb-1">Total Harga</p>
+                              <h5 className="fw-bold text-dark mb-0">Rp {Number(booking.total_price || 0).toLocaleString('id-ID')}</h5>
+                            </div>
+                            
+                            <div className="w-100">
+                              <button className={statusInfo.btnClass} onClick={() => setSelectedBooking(booking)}>
+                                Lihat Detail <i className="bi bi-arrow-right ms-1"></i>
+                              </button>
+                              
+                              {/* Tampilkan Download Tiket Hanya Jika Terkonfirmasi */}
+                              {statusInfo.label === 'Terkonfirmasi' && (
+                                <button className="btn-outline-download" onClick={() => alert("Fitur download tiket sedang dikembangkan!")}>
+                                  Download Tiket <i className="bi bi-download"></i>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
                         </div>
                       );
                     })}
