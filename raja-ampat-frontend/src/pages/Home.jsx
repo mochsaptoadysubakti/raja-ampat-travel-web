@@ -409,7 +409,7 @@ const Home = () => {
 
       {/* --- 3. DESTINASI POPULER --- */}
       <div style={{ 
-        backgroundImage: 'url(https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/e9364312-445e-4870-9d1b-1488a6444493)', 
+        backgroundImage: 'url(https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/2b4b25f9-d706-45e4-be92-23e2d0213c43)', 
         backgroundSize: 'cover', 
         backgroundPosition: 'center top', 
         paddingBottom: '200px',
@@ -552,7 +552,7 @@ const Home = () => {
       </div>
 
       {/* --- 5. PAKET WISATA UNGGULAN --- */}
-      <div className="py-5" style={{ backgroundImage: 'url(https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/82cb2b10-1cc7-49a7-a532-2199555f52ec)', backgroundSize: 'cover', backgroundPosition: 'top' }}>
+      <div className="py-5" style={{ backgroundImage: 'url(https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/14b8612b-fc41-49fc-8d1b-3574223f3bfe)', backgroundSize: 'cover', backgroundPosition: 'top' }}>
         <h2 className="text-center fw-bold text-dark mb-3 display-5" style={{ marginTop: '60px', letterSpacing: '-1px' }}>Paket Wisata Unggulan</h2>
         <p className="text-center text-secondary mb-5 pb-4 fs-5">Temukan paket wisata terbaik untuk pengalaman tak terlupakan</p>
         
