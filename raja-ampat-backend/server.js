@@ -20,7 +20,15 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const app = express();
 
 // Middleware
-app.use(cors());
+// 👇 UPDATE CORS DI SINI 👇
+app.use(cors({
+    origin: [
+        'http://localhost:5173', // URL untuk development lokal (Vite)
+        process.env.FRONTEND_URL // URL frontend Anda di Railway
+    ],
+    credentials: true // Mengizinkan pengiriman cookies/token kredensial
+}));
+
 app.use(express.json()); // Agar bisa menerima request body berupa JSON
 
 // --- FITUR DEBUGGER ANTI-CRASH ---
