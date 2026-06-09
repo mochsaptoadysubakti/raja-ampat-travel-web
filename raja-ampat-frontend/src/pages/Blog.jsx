@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaInstagram, FaFacebook, FaGlobe } from "react-icons/fa";
 import axiosInstance from "axios"; // Menggunakan axios standar seperti kode Anda
 import { Link, useNavigate } from "react-router-dom";
 
@@ -111,8 +112,19 @@ const Blog = () => {
           .blog-hero p { font-size: 1.2rem; max-width: 600px; margin: 0 auto; opacity: 0.9; line-height: 1.6; }
 
           /* FEATURED BLOG CARD (Besar) */
-          .featured-blog-card { background: #fff; border-radius: 24px; overflow: hidden; display: flex; box-shadow: 0 15px 35px rgba(0,0,0,0.08); margin-bottom: 50px; cursor: pointer; transition: transform 0.3s; border: 1px solid #f0f0f0; }
-          .featured-blog-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+          .featured-blog-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            margin-bottom: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          .featured-blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+          }
           .featured-blog-img-wrap { width: 55%; position: relative; overflow: hidden; }
           .featured-blog-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s; min-height: 400px; }
           .featured-blog-card:hover .featured-blog-img { transform: scale(1.05); }
@@ -125,7 +137,7 @@ const Blog = () => {
           .blog-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
           .blog-card:hover .blog-img { transform: scale(1.08); }
           
-          .blog-badge { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.95); padding: 6px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #111; z-index: 2; text-transform: uppercase; letter-spacing: 1px;}
+          .blog-badge { position: absolute; top: 15px; left: 15px; background: #FFB76C; padding: 6px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #111; z-index: 2; text-transform: uppercase; letter-spacing: 1px;}
           .blog-content { padding: 25px; flex: 1; display: flex; flex-direction: column; }
           .blog-author-row { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 0.85rem; color: #64748B; font-weight: 500; }
           .blog-author-img { width: 28px; height: 28px; border-radius: 50%; }
@@ -135,10 +147,38 @@ const Blog = () => {
           .blog-card:hover .blog-readmore { color: #FFB76C; }
           
           /* SEARCH BAR */
-          .search-container { background: #fff; border-radius: 50px; padding: 8px 15px 8px 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); display: flex; align-items: center; max-width: 700px; margin: 0 auto 50px auto; border: 1px solid #eee; }
-          .search-input { border: none; outline: none; width: 100%; font-size: 1rem; color: #333; background: transparent; }
-          .search-btn { background: #111; color: #fff; border: none; border-radius: 40px; padding: 12px 30px; font-weight: 600; transition: all 0.3s; }
-          .search-btn:hover { background: #FFB76C; color: #111; }
+          .search-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto 50px auto;
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #d9d9d9;
+            border-radius: 12px;
+            padding: 0 0 0 20px;
+          }
+          .search-input {
+            flex: 1;
+            height: 56px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 1rem;
+          }
+          .search-btn {
+            height: 56px;
+            min-width: 110px;
+            margin: 0;
+            border: none;
+            border-radius: 0 12px 12px 0;
+            background: #F5B05A;
+            color: #000;
+            font-weight: 600;
+          }
+          .search-btn:hover {
+            background: #e8a34d;
+          }
 
           /* MODAL LOGOUT */
           .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1050; display: flex; justify-content: center; align-items: center; padding: 20px; opacity: 0; animation: fadeInModal 0.3s forwards; }
@@ -158,6 +198,19 @@ const Blog = () => {
             .search-container { flex-direction: column; border-radius: 20px; padding: 15px; }
             .search-input { margin-bottom: 10px; padding: 5px; text-align: center; }
             .search-btn { width: 100%; }
+          }
+
+          /*--footer--*/
+          .social-link {
+            transition: all 0.3s ease;
+            color: #000;
+          }
+          .social-link:hover {
+            transform: translateX(5px);
+            color: #ffffff !important;
+          }
+          .social-icon {
+            font-size: 28px;
           }
         `}
       </style>
@@ -217,33 +270,61 @@ const Blog = () => {
         {/* --- FEATURED BLOG (SOROTAN ARTIKEL UTAMA) --- */}
         {featuredBlog && !searchQuery && (
           /* --- PERUBAHAN: Mengubah onClick agar melakukan navigate ke rute detail blog --- */
-          <div className="featured-blog-card anim-fade-up" style={{ animationDelay: '0.1s' }} onClick={() => navigate(`/blog/${featuredBlog.id}`)}>
-            <div className="featured-blog-img-wrap">
-              <img 
-                src={featuredBlog.image_url || featuredBlog.image || featuredBlog.foto || "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/7454272c-e62f-44c0-b6b3-bf8bdcfa8120"} 
-                alt={featuredBlog.title} 
-                className="featured-blog-img" 
-              />
-            </div>
-            <div className="featured-blog-content">
-              <div className="blog-author-row mb-3">
-                <span className="badge px-3 py-2 rounded-pill" style={{ backgroundColor: '#FFB76C', color: '#111', fontWeight: 700, letterSpacing: '1px' }}>
-                  {featuredBlog.category || "SOROTAN UTAMA"}
-                </span>
-                <span className="ms-2">{featuredBlog.date || "Terbaru"}</span>
-              </div>
-              <h1 className="fw-bold mb-3 display-6" style={{ letterSpacing: '-1px' }}>
-                {featuredBlog.title || "Raja Ampat: Surga Bawah Laut Indonesia"}
+          <div
+            className="featured-blog-card anim-fade-up"
+            style={{
+              backgroundImage: `linear-gradient(
+                to right,
+                rgba(0,0,0,0.65),
+                rgba(0,0,0,0.25)
+              ),
+              url(${featuredBlog.image_url || featuredBlog.image || featuredBlog.foto})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              height: '450px',
+              borderRadius: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '60px',
+              color: 'white',
+              cursor: 'pointer'
+            }}
+            onClick={() => navigate(`/blog/${featuredBlog.id}`)}
+          >
+            <div style={{ maxWidth: '500px' }}>
+              <h1
+                style={{
+                  fontSize: '4rem',
+                  fontWeight: '700',
+                  lineHeight: '1.2',
+                  marginBottom: '20px'
+                }}
+              >
+                {featuredBlog.title}
               </h1>
-              <p className="fs-6 text-secondary mb-4" style={{ lineHeight: '1.8' }}>
-                {featuredBlog.description || "Menyelami keindahan Raja Ampat, rumah bagi keanekaragaman hayati laut terbesar di dunia. Temukan rahasia tersembunyi di balik perairan biru kristalnya."}
+          
+              <p
+                style={{
+                  fontSize: '1.2rem',
+                  lineHeight: '1.8',
+                  marginBottom: '40px'
+                }}
+              >
+                {featuredBlog.description}
               </p>
-              <div className="d-flex align-items-center gap-2 text-dark fw-bold mt-auto" style={{ fontSize: '1rem' }}>
-                Read More 
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+          
+              <button
+                style={{
+                  background: '#fff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px 30px',
+                  fontWeight: '600',
+                  fontSize: '1.1rem'
+                }}
+              >
+                Read More →
+              </button>
             </div>
           </div>
         )}
@@ -309,53 +390,176 @@ const Blog = () => {
       </div>
 
       {/* --- FOOTER KONSISTEN --- */}
-      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
-        <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%', height: 'auto', marginBottom: '-1px' }}>
-          <path fill="#70E6D6" d="M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,64C672,43,768,21,864,21.3C960,21,1056,43,1152,58.7C1248,75,1344,85,1392,90.7L1440,96L1440,121L0,121Z"></path>
+      <div style={{ position: 'relative', marginTop: '50px', width: '100%', overflow: 'hidden' }}>
+        
+        {/* SVG OMBAK (JANGAN DIUBAH) */}
+        <svg
+          viewBox="0 0 1440 120"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: 'auto',
+            marginBottom: '-1px'
+          }}
+        >
+          <path
+            fill="#70E6D6"
+            d="M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,64C672,43,768,21,864,21.3C960,21,1056,43,1152,58.7C1248,75,1344,85,1392,90.7L1440,96L1440,121L0,121Z"
+          ></path>
         </svg>
-        <footer className="pt-0 pb-4" style={{ backgroundColor: '#70E6D6' }}>
-          <div className="container py-4">
-            <div className="row g-4 text-center justify-content-center">
+
+        {/* KONTEN FOOTER */}
+        <footer className="pt-0 pb-2" style={{ backgroundColor: '#70E6D6' }}>
+          <div className="container py-3">
+
+            <div className="row g-3 text-center justify-content-center">
+
+              {/* Kolom 1: Ampatheia */}
               <div className="col-lg-4 px-lg-3">
-                <h3 className="fw-bold mb-4 text-dark brand-text">Ampatheia</h3>
-                <p className="small text-dark fw-medium" style={{ lineHeight: '1.8' }}>
-                  Ampatheia hadir untuk memudahkan perjalanan wisata Anda ke Raja Ampat. Temukan paket wisata lengkap, itinerary terstruktur, dan pemandu lokal terpercaya dalam satu platform.
+                <h4
+                  className="fw-bold mb-2 text-dark"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Ampatheia
+                </h4>
+
+                <p
+                  className="text-dark fw-medium mb-0"
+                  style={{
+                    lineHeight: '1.7',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  Ampatheia hadir untuk memudahkan perjalanan wisata Anda ke Raja Ampat.
+                  Temukan paket wisata lengkap, itinerary terstruktur, dan pemandu lokal
+                  terpercaya dalam satu platform.
                 </p>
               </div>
+
+              {/* Kolom 2: Tautan */}
               <div className="col-lg-2 px-lg-3">
-                <h5 className="fw-bold mb-4 text-dark brand-text">Tautan</h5>
-                <ul className="list-unstyled small fw-medium text-dark" style={{ lineHeight: '2.5' }}>
-                  <li><Link to="/" className="text-dark text-decoration-none nav-link-custom">Beranda</Link></li>
-                  <li><Link to="/tour-packages" className="text-dark text-decoration-none nav-link-custom">Paket Wisata</Link></li>
-                  <li><Link to="/destinasi" className="text-dark text-decoration-none nav-link-custom">Destinasi</Link></li>
-                  <li><Link to="/blog" className="text-dark text-decoration-none nav-link-custom">Blog</Link></li>
+                <h6
+                  className="fw-bold mb-2 text-dark"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Tautan
+                </h6>
+
+                <ul
+                  className="list-unstyled text-dark fw-medium mb-0"
+                  style={{
+                    lineHeight: '2',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  <li>
+                    <Link to="/" className="text-dark text-decoration-none nav-link-custom">
+                      Beranda
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
+                      to="/tour-packages"
+                      className="text-dark text-decoration-none nav-link-custom"
+                    >
+                      Paket Wisata
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
+                      to="#"
+                      className="text-dark text-decoration-none nav-link-custom"
+                    >
+                      Blog
+                    </Link>
+                  </li>
                 </ul>
               </div>
+
+              {/* Kolom 3: Hubungi Kami */}
               <div className="col-lg-3 px-lg-3">
-                <h5 className="fw-bold mb-4 text-dark brand-text">Hubungi Kami</h5>
-                <ul className="list-unstyled small fw-medium text-dark" style={{ lineHeight: '2.5' }}>
+                <h6
+                  className="fw-bold mb-2 text-dark"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Hubungi Kami
+                </h6>
+
+                <ul
+                  className="list-unstyled text-dark fw-medium mb-0"
+                  style={{
+                    lineHeight: '1.8',
+                    fontSize: '0.9rem'
+                  }}
+                >
                   <li>Email: info@ampatheia.com</li>
                   <li>Telepon: +62 812-3456-7890</li>
                   <li>Alamat: Jakarta, Indonesia</li>
                 </ul>
               </div>
+
+              {/* Kolom 4: Ikuti Kami */}
               <div className="col-lg-3 px-lg-3">
-                <h5 className="fw-bold mb-4 text-dark brand-text">Ikuti Kami</h5>
-                <div className="d-flex flex-column align-items-center gap-3 small fw-medium text-dark mt-3">
-                  <a href="#" className="text-dark text-decoration-none d-flex align-items-center gap-2">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15 pipe h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
-                    ampatheia.id
+                <h6
+                  className="fw-bold mb-2 text-dark"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Ikuti Kami
+                </h6>
+
+                <div
+                  className="d-flex flex-column align-items-center fw-medium mt-2"
+                  style={{
+                    gap: '12px',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  <a
+                    href="https://instagram.com/ampatheia.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                  >
+                    <FaInstagram size={22} />
+                    <span>ampatheia.id</span>
                   </a>
-                  <a href="#" className="text-dark text-decoration-none d-flex align-items-center gap-2">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/></svg>
-                    ampatheia.id
+
+                  <a
+                    href="https://facebook.com/ampatheia.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                  >
+                    <FaFacebook size={22} />
+                    <span>ampatheia.id</span>
+                  </a>
+
+                  <a
+                    href="https://ampatheia.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                  >
+                    <FaGlobe size={22} />
+                    <span>ampatheia.id</span>
                   </a>
                 </div>
               </div>
-              <div className="text-center pt-5 mt-3">
-                <span className="small text-dark fw-medium">Copyright © 2026 Ampatheia. Hak cipta dilindungi</span>
-              </div>
+
             </div>
+
+            <div className="text-center pt-2 mt-2">
+              <span
+                className="text-dark fw-medium"
+                style={{ fontSize: '0.85rem' }}
+              >
+                Copyright © 2026 Ampatheia. Hak cipta dilindungi
+              </span>
+            </div>
+
           </div>
         </footer>
       </div>

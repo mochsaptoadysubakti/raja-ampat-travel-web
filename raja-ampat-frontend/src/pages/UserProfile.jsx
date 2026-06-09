@@ -428,7 +428,7 @@ const UserProfile = () => {
             {/* TAB 2: RIWAYAT PESANAN */}
             {activeTab === 'riwayat' && (
               <div className="profile-content-card anim-fade-up" style={{ animationDelay: '0.1s' }}>
-                <h3 className="section-title"><span style={{ fontSize: '1.8rem' }}>🧳</span> Riwayat Pesanan</h3>
+                <h3 className="section-title"><span style={{ fontSize: '1.8 rem' }}></span> Riwayat Pesanan</h3>
                 <p className="text-muted small mb-4">Berikut adalah daftar pesanan paket wisata Anda.</p>
                 
                 {isLoadingBookings ? (

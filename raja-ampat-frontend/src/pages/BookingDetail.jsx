@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaInstagram, FaFacebook, FaGlobe } from "react-icons/fa";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
 
@@ -206,6 +207,19 @@ export default function BookingDetail() {
                     
                     @keyframes fadeInModal { to { opacity: 1; } }
                     @keyframes scaleUpModal { to { transform: scale(1); } }
+
+                    /*--footer--*/
+                    .social-link {
+                        transition: all 0.3s ease;
+                        color: #000;
+                    }
+                    .social-link:hover {
+                        transform: translateX(5px);
+                        color: #ffffff !important;
+                    }
+                    .social-icon {
+                        font-size: 28px;
+                    }
                 `}
             </style>
 
@@ -290,7 +304,7 @@ export default function BookingDetail() {
                                 <label htmlFor="terms" className="text-secondary small mb-0">Dengan mengkonfirmasi, Anda menyetujui syarat dan ketentuan layanan kami.</label>
                             </div>
 
-                            <button className="btn w-100 py-3 rounded-pill fw-bold text-white fs-5 border-0 shadow-sm" style={{ backgroundColor: '#111', transition: 'all 0.3s' }} onClick={handleConfirmBooking} disabled={loading}>
+                            <button className="btn w-100 py-3 rounded-pill fw-bold text-black fs-5 border-0 shadow-sm" style={{ backgroundColor: '#FFB76C', transition: 'all 0.3s' }} onClick={handleConfirmBooking} disabled={loading}>
                                 {loading ? "Memproses..." : "Konfirmasi Pesanan"}
                             </button>
                         </div>
@@ -341,11 +355,178 @@ export default function BookingDetail() {
             </div>
 
             {/* FOOTER */}
-            <footer className="py-4 mt-auto" style={{ backgroundColor: '#fff', borderTop: '1px solid #E5E7EB' }}>
-                <div className="container text-center">
-                    <p className="small text-secondary fw-medium mb-0">Copyright © 2026 Ampatheia. Hak Cipta Dilindungi.</p>
+            <div style={{ position: 'relative', marginTop: '50px', width: '100%', overflow: 'hidden' }}>
+                {/* SVG OMBAK (JANGAN DIUBAH) */}
+                <svg
+                viewBox="0 0 1440 120"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{
+                    display: 'block',
+                    width: '100%',
+                    height: 'auto',
+                    marginBottom: '-1px'
+                }}
+                >
+                <path
+                    fill="#70E6D6"
+                    d="M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,64C672,43,768,21,864,21.3C960,21,1056,43,1152,58.7C1248,75,1344,85,1392,90.7L1440,96L1440,121L0,121Z"
+                ></path>
+                </svg>
+
+                {/* KONTEN FOOTER */}
+                <footer className="pt-0 pb-2" style={{ backgroundColor: '#70E6D6' }}>
+                <div className="container py-3">
+
+                    <div className="row g-3 text-center justify-content-center">
+
+                    {/* Kolom 1: Ampatheia */}
+                    <div className="col-lg-4 px-lg-3">
+                        <h4
+                        className="fw-bold mb-2 text-dark"
+                        style={{ fontFamily: 'Poppins, sans-serif' }}
+                        >
+                        Ampatheia
+                        </h4>
+
+                        <p
+                        className="text-dark fw-medium mb-0"
+                        style={{
+                            lineHeight: '1.7',
+                            fontSize: '0.9rem'
+                        }}
+                        >
+                        Ampatheia hadir untuk memudahkan perjalanan wisata Anda ke Raja Ampat.
+                        Temukan paket wisata lengkap, itinerary terstruktur, dan pemandu lokal
+                        terpercaya dalam satu platform.
+                        </p>
+                    </div>
+
+                    {/* Kolom 2: Tautan */}
+                    <div className="col-lg-2 px-lg-3">
+                        <h6
+                        className="fw-bold mb-2 text-dark"
+                        style={{ fontFamily: 'Poppins, sans-serif' }}
+                        >
+                        Tautan
+                        </h6>
+
+                        <ul
+                        className="list-unstyled text-dark fw-medium mb-0"
+                        style={{
+                            lineHeight: '2',
+                            fontSize: '0.9rem'
+                        }}
+                        >
+                        <li>
+                            <Link to="/" className="text-dark text-decoration-none nav-link-custom">
+                            Beranda
+                            </Link>
+                        </li>
+
+                        <li>
+                            <Link
+                            to="/tour-packages"
+                            className="text-dark text-decoration-none nav-link-custom"
+                            >
+                            Paket Wisata
+                            </Link>
+                        </li>
+
+                        <li>
+                            <Link
+                            to="#"
+                            className="text-dark text-decoration-none nav-link-custom"
+                            >
+                            Blog
+                            </Link>
+                        </li>
+                        </ul>
+                    </div>
+
+                    {/* Kolom 3: Hubungi Kami */}
+                    <div className="col-lg-3 px-lg-3">
+                        <h6
+                        className="fw-bold mb-2 text-dark"
+                        style={{ fontFamily: 'Poppins, sans-serif' }}
+                        >
+                        Hubungi Kami
+                        </h6>
+
+                        <ul
+                        className="list-unstyled text-dark fw-medium mb-0"
+                        style={{
+                            lineHeight: '1.8',
+                            fontSize: '0.9rem'
+                        }}
+                        >
+                        <li>Email: info@ampatheia.com</li>
+                        <li>Telepon: +62 812-3456-7890</li>
+                        <li>Alamat: Jakarta, Indonesia</li>
+                        </ul>
+                    </div>
+
+                    {/* Kolom 4: Ikuti Kami */}
+                    <div className="col-lg-3 px-lg-3">
+                        <h6
+                        className="fw-bold mb-2 text-dark"
+                        style={{ fontFamily: 'Poppins, sans-serif' }}
+                        >
+                        Ikuti Kami
+                        </h6>
+
+                        <div
+                        className="d-flex flex-column align-items-center fw-medium mt-2"
+                        style={{
+                            gap: '12px',
+                            fontSize: '0.9rem'
+                        }}
+                        >
+                        <a
+                            href="https://instagram.com/ampatheia.id"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="social-link text-decoration-none d-flex align-items-center gap-2"
+                        >
+                            <FaInstagram size={22} />
+                            <span>ampatheia.id</span>
+                        </a>
+
+                        <a
+                            href="https://facebook.com/ampatheia.id"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="social-link text-decoration-none d-flex align-items-center gap-2"
+                        >
+                            <FaFacebook size={22} />
+                            <span>ampatheia.id</span>
+                        </a>
+
+                        <a
+                            href="https://ampatheia.id"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="social-link text-decoration-none d-flex align-items-center gap-2"
+                        >
+                            <FaGlobe size={22} />
+                            <span>ampatheia.id</span>
+                        </a>
+                        </div>
+                    </div>
+
+                    </div>
+
+                    <div className="text-center pt-2 mt-2">
+                    <span
+                        className="text-dark fw-medium"
+                        style={{ fontSize: '0.85rem' }}
+                    >
+                        Copyright © 2026 Ampatheia. Hak cipta dilindungi
+                    </span>
+                    </div>
+
                 </div>
-            </footer>
+                </footer>
+            </div>
         </div>
     );
 }

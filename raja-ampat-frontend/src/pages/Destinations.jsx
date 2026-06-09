@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaInstagram, FaFacebook, FaGlobe } from "react-icons/fa";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -161,6 +162,18 @@ const Destinations = () => {
             .search-input { margin-bottom: 10px; padding: 5px; text-align: center; }
             .search-btn { width: 100%; }
             .featured-content { padding: 25px; }
+
+            /*--footer--*/
+          .social-link {
+            transition: all 0.3s ease;
+            color: #000;
+          }
+          .social-link:hover {
+            transform: translateX(5px);
+            color: #ffffff !important;
+          }
+          .social-icon {
+            font-size: 28px;
           }
         `}
       </style>
@@ -340,49 +353,176 @@ const Destinations = () => {
       </div>
 
       {/* --- FOOTER KONSISTEN --- */}
-      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
-        <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%', height: 'auto', marginBottom: '-1px' }}>
-          <path fill="#70E6D6" d="M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,64C672,43,768,21,864,21.3C960,21,1056,43,1152,58.7C1248,75,1344,85,1392,90.7L1440,96L1440,121L0,121Z"></path>
+      <div style={{ position: 'relative', marginTop: '50px', width: '100%', overflow: 'hidden' }}>
+        
+        {/* SVG OMBAK (JANGAN DIUBAH) */}
+        <svg
+          viewBox="0 0 1440 120"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: 'auto',
+            marginBottom: '-1px'
+          }}
+        >
+          <path
+            fill="#70E6D6"
+            d="M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,64C672,43,768,21,864,21.3C960,21,1056,43,1152,58.7C1248,75,1344,85,1392,90.7L1440,96L1440,121L0,121Z"
+          ></path>
         </svg>
-        <footer className="pt-0 pb-4" style={{ backgroundColor: '#70E6D6' }}>
-          <div className="container py-4">
-            <div className="row g-4 text-center justify-content-center">
+
+        {/* KONTEN FOOTER */}
+        <footer className="pt-0 pb-2" style={{ backgroundColor: '#70E6D6' }}>
+          <div className="container py-3">
+
+            <div className="row g-3 text-center justify-content-center">
+
+              {/* Kolom 1: Ampatheia */}
               <div className="col-lg-4 px-lg-3">
-                <h3 className="fw-bold mb-4 text-dark brand-text">Ampatheia</h3>
-                <p className="small text-dark fw-medium" style={{ lineHeight: '1.8' }}>
-                  Ampatheia hadir untuk memudahkan perjalanan wisata Anda ke Raja Ampat. Temukan paket wisata lengkap, itinerary terstruktur, dan pemandu lokal terpercaya dalam satu platform.
+                <h4
+                  className="fw-bold mb-2 text-dark"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Ampatheia
+                </h4>
+
+                <p
+                  className="text-dark fw-medium mb-0"
+                  style={{
+                    lineHeight: '1.7',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  Ampatheia hadir untuk memudahkan perjalanan wisata Anda ke Raja Ampat.
+                  Temukan paket wisata lengkap, itinerary terstruktur, dan pemandu lokal
+                  terpercaya dalam satu platform.
                 </p>
               </div>
+
+              {/* Kolom 2: Tautan */}
               <div className="col-lg-2 px-lg-3">
-                <h5 className="fw-bold mb-4 text-dark brand-text">Tautan</h5>
-                <ul className="list-unstyled small fw-medium text-dark" style={{ lineHeight: '2.5' }}>
-                  <li><Link to="/Home" className="text-dark text-decoration-none nav-link-custom">Beranda</Link></li>
-                  <li><Link to="/tour-packages" className="text-dark text-decoration-none nav-link-custom">Paket Wisata</Link></li>
-                  <li><Link to="/destinasi" className="text-dark text-decoration-none nav-link-custom">Destinasi</Link></li>
-                  <li><Link to="/Blog" className="text-dark text-decoration-none nav-link-custom">Blog</Link></li>
+                <h6
+                  className="fw-bold mb-2 text-dark"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Tautan
+                </h6>
+
+                <ul
+                  className="list-unstyled text-dark fw-medium mb-0"
+                  style={{
+                    lineHeight: '2',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  <li>
+                    <Link to="/" className="text-dark text-decoration-none nav-link-custom">
+                      Beranda
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
+                      to="/tour-packages"
+                      className="text-dark text-decoration-none nav-link-custom"
+                    >
+                      Paket Wisata
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
+                      to="#"
+                      className="text-dark text-decoration-none nav-link-custom"
+                    >
+                      Blog
+                    </Link>
+                  </li>
                 </ul>
               </div>
+
+              {/* Kolom 3: Hubungi Kami */}
               <div className="col-lg-3 px-lg-3">
-                <h5 className="fw-bold mb-4 text-dark brand-text">Hubungi Kami</h5>
-                <ul className="list-unstyled small fw-medium text-dark" style={{ lineHeight: '2.5' }}>
+                <h6
+                  className="fw-bold mb-2 text-dark"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Hubungi Kami
+                </h6>
+
+                <ul
+                  className="list-unstyled text-dark fw-medium mb-0"
+                  style={{
+                    lineHeight: '1.8',
+                    fontSize: '0.9rem'
+                  }}
+                >
                   <li>Email: info@ampatheia.com</li>
                   <li>Telepon: +62 812-3456-7890</li>
                   <li>Alamat: Jakarta, Indonesia</li>
                 </ul>
               </div>
+
+              {/* Kolom 4: Ikuti Kami */}
               <div className="col-lg-3 px-lg-3">
-                <h5 className="fw-bold mb-4 text-dark brand-text">Ikuti Kami</h5>
-                <div className="d-flex flex-column align-items-center gap-3 small fw-medium text-dark mt-3">
-                  <a href="#" className="text-dark text-decoration-none d-flex align-items-center gap-2">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
-                    ampatheia.id
+                <h6
+                  className="fw-bold mb-2 text-dark"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Ikuti Kami
+                </h6>
+
+                <div
+                  className="d-flex flex-column align-items-center fw-medium mt-2"
+                  style={{
+                    gap: '12px',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  <a
+                    href="https://instagram.com/ampatheia.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                  >
+                    <FaInstagram size={22} />
+                    <span>ampatheia.id</span>
+                  </a>
+
+                  <a
+                    href="https://facebook.com/ampatheia.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                  >
+                    <FaFacebook size={22} />
+                    <span>ampatheia.id</span>
+                  </a>
+
+                  <a
+                    href="https://ampatheia.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                  >
+                    <FaGlobe size={22} />
+                    <span>ampatheia.id</span>
                   </a>
                 </div>
               </div>
-              <div className="text-center pt-5 mt-3">
-                <span className="small text-dark fw-medium">Copyright © 2026 Ampatheia. Hak cipta dilindungi</span>
-              </div>
+
             </div>
+
+            <div className="text-center pt-2 mt-2">
+              <span
+                className="text-dark fw-medium"
+                style={{ fontSize: '0.85rem' }}
+              >
+                Copyright © 2026 Ampatheia. Hak cipta dilindungi
+              </span>
+            </div>
+
           </div>
         </footer>
       </div>
