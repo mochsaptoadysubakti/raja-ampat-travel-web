@@ -40,8 +40,8 @@ const ManageBookings = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      // PERBAIKAN: Hapus kata "/status" di ujung URL
-      await axios.put(`http://localhost:5000/api/bookings/${id}`, { status: newStatus }, config);
+      // ✅ SUDAH DIPERBAIKI MENGGUNAKAN VARIABEL URL
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/bookings/${id}`, { status: newStatus }, config);
       
       setBookings(bookings.map(b => b.id === id ? { ...b, status: newStatus } : b));
     } catch (error) {
@@ -57,7 +57,9 @@ const ManageBookings = () => {
   const executeDelete = async () => {
     if (!bookingToDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/api/bookings/${bookingToDelete.id}`, config);
+      // ✅ SUDAH DIPERBAIKI MENGGUNAKAN VARIABEL URL
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/bookings/${bookingToDelete.id}`, config);
+      
       setShowDeleteModal(false);
       setBookingToDelete(null);
       fetchBookings();
@@ -92,7 +94,7 @@ const ManageBookings = () => {
 
   const getStatusBadge = (status) => {
     const s = status ? status.toLowerCase() : '';
-    if (s === 'confirmed' || s === 'success') return 'bg-label-success text-success';
+    if (s === 'confirmed' || s === 'success' || s === 'settlement') return 'bg-label-success text-success';
     if (s === 'cancelled' || s === 'failed') return 'bg-label-danger text-danger';
     return 'bg-label-warning text-warning'; 
   };

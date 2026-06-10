@@ -45,7 +45,8 @@ const UserProfile = () => {
   // Fungsi Tarik Riwayat Pesanan
   const fetchBookingHistory = async (userId, token) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/bookings/user/${userId}`, {
+      // ✅ DIPERBAIKI: Menggunakan variabel environment
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/bookings/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const dataArray = response.data?.data || response.data || [];
@@ -74,7 +75,8 @@ const UserProfile = () => {
         email: user.email 
       };
 
-      await axios.put(`http://localhost:5000/api/users/${user.id}`, payload, {
+      // ✅ DIPERBAIKI: Menggunakan variabel environment
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/${user.id}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -113,7 +115,7 @@ const UserProfile = () => {
   // Helper Fungsi Status Badge
   const getStatusDisplay = (status) => {
     const statusLower = (status || '').toLowerCase();
-    if (statusLower.includes('confirmed') || statusLower.includes('lunas') || statusLower.includes('success')) {
+    if (statusLower.includes('confirmed') || statusLower.includes('lunas') || statusLower.includes('success') || statusLower.includes('settlement')) {
       return { 
         badgeClass: 'badge-confirmed', 
         label: 'Terkonfirmasi', 
@@ -288,7 +290,7 @@ const UserProfile = () => {
             <div className="mb-4">
               <div className="d-flex justify-content-between mb-2 border-bottom pb-2">
                 <span className="text-muted">Nama Paket</span>
-                <span className="fw-medium text-dark text-end">{selectedBooking.tour_name || selectedBooking.title || "Paket Wisata"}</span>
+                <span className="fw-medium text-dark text-end">{selectedBooking.tour_name || selectedBooking.title || selectedBooking.package_name || "Paket Wisata"}</span>
               </div>
               <div className="d-flex justify-content-between mb-2 border-bottom pb-2">
                 <span className="text-muted">Tanggal Keberangkatan</span>
@@ -458,7 +460,7 @@ const UserProfile = () => {
                           <div className="flex-grow-1 py-1">
                             <span className="badge bg-light text-secondary border mb-2 px-2 py-1" style={{ fontSize: '0.75rem'}}>ID: {booking.id || 20 + index}</span>
                             <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem', lineHeight: '1.4' }}>
-                              {booking.tour_name || booking.title || "Paket Eksklusif Raja Ampat 3H2M"}
+                              {booking.tour_name || booking.title || booking.package_name || "Paket Eksklusif Raja Ampat 3H2M"}
                             </h5>
                             
                             <div className="d-flex align-items-center ticket-details-mobile">
