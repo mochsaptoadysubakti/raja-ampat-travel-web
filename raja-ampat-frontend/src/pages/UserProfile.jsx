@@ -23,7 +23,7 @@ const UserProfile = () => {
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null); // State untuk Pop-up
 
-  // --- NEW STATE: POP-UP REVIEW/ULASAN ---
+  // --- STATE: POP-UP REVIEW/ULASAN ---
   const [bookingToReview, setBookingToReview] = useState(null); // Menyimpan objek paket yang akan direview
   const [reviewRating, setReviewRating] = useState(5); // Rating bintang default 5
   const [reviewComment, setReviewComment] = useState(""); // Komentar ulasan
@@ -51,7 +51,6 @@ const UserProfile = () => {
   // Fungsi Tarik Riwayat Pesanan
   const fetchBookingHistory = async (userId, token) => {
     try {
-      // ✅ DIPERBAIKI: Menggunakan variabel environment
       const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/bookings/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -81,7 +80,6 @@ const UserProfile = () => {
         email: user.email 
       };
 
-      // ✅ DIPERBAIKI: Menggunakan variabel environment
       await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/${user.id}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -110,8 +108,8 @@ const UserProfile = () => {
   // --- FUNGSI KLIK TOMBOL REVIEW ---
   const handleOpenReviewModal = (booking) => {
     setBookingToReview(booking);
-    setReviewRating(5); // Reset ke bintang 5 saat membuka pop-up baru
-    setReviewComment(""); // Kosongkan text ulasan sebelumnya
+    setReviewRating(5); 
+    setReviewComment(""); 
   };
 
   // --- FUNGSI SUBMIT ULASAN (POP-UP) ---
@@ -126,9 +124,13 @@ const UserProfile = () => {
       const token = localStorage.getItem('userToken');
       const configHeaders = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-      // ✅ SUDAH DIAKTIFKAN: Mengirim data review ke Backend Database Railway
+      // Ambil package_id dari objek booking secara fleksibel
+      const targetPackageId = bookingToReview.package_id || bookingToReview.tour_package_id || bookingToReview.id;
+
+      // ✅ DIPERBAIKI: Mengirim payload parameter yang 100% cocok dengan Controller Backend kamu
       await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/reviews`, {
-        booking_id: bookingToReview.id,
+        user_id: user.id,
+        package_id: targetPackageId,
         rating: reviewRating,
         comment: reviewComment
       }, configHeaders);
@@ -136,11 +138,12 @@ const UserProfile = () => {
       alert(`Terima kasih atas ulasan Anda! ❤️`);
       setBookingToReview(null); // Tutup pop-up modal setelah sukses submit
       
-      // Opsional: Refresh riwayat pesanan (barangkali ada status berubah dsb)
+      // Refresh riwayat pesanan jika diperlukan
       fetchBookingHistory(user.id, token);
     } catch (error) {
       console.error("Gagal mengirim ulasan:", error);
-      alert("Terjadi kesalahan saat mengirim ulasan ke server.");
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message;
+      alert(`Gagal mengirim ulasan ke server: ${errorMsg}`);
     } finally {
       setIsSubmittingReview(false);
     }
@@ -211,7 +214,7 @@ const UserProfile = () => {
           @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
           .profile-sidebar { background: #fff; border-radius: 20px; padding: 30px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
-          .profile-avatar-container { text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 20px; }
+          .profile-sidebar-container { text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 20px; }
           .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #F4F7FE; box-shadow: 0 5px 15px rgba(255, 183, 108, 0.3); margin-bottom: 15px; }
           
           .profile-menu-item { display: flex; align-items: center; gap: 15px; padding: 14px 20px; border-radius: 12px; color: #64748B; font-weight: 600; text-decoration: none; transition: all 0.3s; cursor: pointer; margin-bottom: 8px; border: 1px solid transparent; }
@@ -304,7 +307,7 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* POP-UP DETAIL TRANSKASI */}
+      {/* POP-UP DETAIL TRANSAKSI */}
       {selectedBooking && (
         <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={() => setSelectedBooking(null)}>
           <div className="modal-content-large" onClick={(e) => e.stopPropagation()}>
@@ -537,7 +540,7 @@ const UserProfile = () => {
             {/* TAB 2: RIWAYAT PESANAN */}
             {activeTab === 'riwayat' && (
               <div className="profile-content-card anim-fade-up" style={{ animationDelay: '0.1s' }}>
-                <h3 className="section-title"><span style={{ fontSize: '1.8 rem' }}></span> Riwayat Pesanan</h3>
+                <h3 className="section-title">Riwayat Pesanan</h3>
                 <p className="text-muted small mb-4">Berikut adalah daftar pesanan paket wisata Anda.</p>
                 
                 {isLoadingBookings ? (
@@ -564,9 +567,9 @@ const UserProfile = () => {
 
                           {/* Detail Info Tengah */}
                           <div className="flex-grow-1 py-1">
-                            <span className="badge bg-light text-secondary border mb-2 px-2 py-1" style={{ fontSize: '0.75rem'}}>ID: {booking.id || 20 + index}</span>
+                            <span className="badge bg-light text-secondary border mb-2 px-2 py-1" style={{ fontSize: '0.75rem'}}>ID: {booking.id}</span>
                             <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem', lineHeight: '1.4' }}>
-                              {booking.tour_name || booking.title || booking.package_name || "Paket Eksklusif Raja Ampat 3H2M"}
+                              {booking.tour_name || booking.title || booking.package_name || "Paket Wisata"}
                             </h5>
                             
                             <div className="d-flex align-items-center ticket-details-mobile">
@@ -600,14 +603,11 @@ const UserProfile = () => {
                                 Lihat Detail <i className="bi bi-arrow-right ms-1"></i>
                               </button>
                               
-                              {/* Tampilkan Download Tiket & Beri Ulasan Hanya Jika Terkonfirmasi */}
                               {statusInfo.label === 'Terkonfirmasi' && (
                                 <>
                                   <button className="btn-outline-download" onClick={() => alert("Fitur download tiket sedang dikembangkan!")}>
                                     Download Tiket <i className="bi bi-download"></i>
                                   </button>
-                                  
-                                  {/* ✅ BUTTON BERI ULASAN BARU */}
                                   <button className="btn-outline-review" onClick={() => handleOpenReviewModal(booking)}>
                                     Beri Ulasan <i className="bi bi-star-fill text-warning"></i>
                                   </button>
