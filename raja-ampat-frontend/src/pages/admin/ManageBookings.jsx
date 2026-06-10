@@ -23,7 +23,7 @@ const ManageBookings = () => {
   const fetchBookings = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/bookings', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/bookings`, config);
       const fetchedData = response.data; 
       setBookings(Array.isArray(fetchedData) ? fetchedData : []);
     } catch (error) {

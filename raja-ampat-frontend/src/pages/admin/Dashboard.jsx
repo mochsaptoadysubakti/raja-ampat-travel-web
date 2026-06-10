@@ -47,21 +47,21 @@ const Dashboard = () => {
 
       // 1. Ambil Data Paket Tour Asli
       try {
-        const resPackages = await axios.get('http://localhost:5000/api/tour_packages', config);
+        const resPackages = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages`, config);
         const dataPkg = resPackages.data?.data || resPackages.data || [];
         if (Array.isArray(dataPkg)) countPackages = dataPkg.length;
       } catch (error) { console.log("Gagal ambil paket:", error.message); }
 
       // 2. Ambil Data Artikel Blog Asli
       try {
-        const resBlogs = await axios.get('http://localhost:5000/api/blogs', config);
+        const resBlogs = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`, config);
         const dataBlog = resBlogs.data?.data || resBlogs.data || [];
         if (Array.isArray(dataBlog)) countBlogs = dataBlog.length;
       } catch (error) { console.log("Gagal ambil blog:", error.message); }
 
       // 3. Ambil Data Bookings Asli (Tabel Recent Bookings)
       try {
-        const resBookings = await axios.get('http://localhost:5000/api/bookings', config);
+        const resBookings = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/bookings`, config);
         const dataBooking = resBookings.data?.data || resBookings.data || [];
         if (Array.isArray(dataBooking)) {
           countBookings = dataBooking.length;
@@ -72,14 +72,14 @@ const Dashboard = () => {
 
       // 4. Ambil Data Galeri Asli
       try {
-        const resGallery = await axios.get('http://localhost:5000/api/gallery', config);
+        const resGallery = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/gallery`, config);
         const dataGal = resGallery.data?.data || resGallery.data || [];
         if (Array.isArray(dataGal)) countGallery = dataGal.length;
       } catch (error) { console.log("Gagal ambil galeri:", error.message); }
 
       // 5. Ambil Data Pesan Masuk Asli (Inbox Section)
       try {
-        const resInbox = await axios.get('http://localhost:5000/api/contacts', config);
+        const resInbox = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contacts`, config);
         const dataInb = resInbox.data?.data || resInbox.data || [];
         if (Array.isArray(dataInb)) {
           countInbox = dataInb.length;
@@ -90,7 +90,7 @@ const Dashboard = () => {
 
       // 6. Ambil Data Destinasi Asli
       try {
-        const resDest = await axios.get('http://localhost:5000/api/destinations', config);
+        const resDest = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations`, config);
         const dataDest = resDest.data?.data || resDest.data || [];
         if (Array.isArray(dataDest)) {
           setRealDestinations(dataDest.slice(0, 5));

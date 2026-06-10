@@ -44,7 +44,7 @@ const TourDetail = () => {
 
     const fetchItinerary = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/itinerary');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/itinerary`);
         let allData = response.data?.data || response.data || [];
         if (!Array.isArray(allData)) allData = []; 
 
@@ -60,7 +60,7 @@ const TourDetail = () => {
 
     const fetchDestinations = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/destinations');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations`);
         let data = response.data?.data || response.data || [];
         if (!Array.isArray(data)) data = [];
         setDestinationList(data);

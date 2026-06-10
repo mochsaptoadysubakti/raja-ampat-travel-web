@@ -20,7 +20,7 @@ const ContactInbox = () => {
   const config = { headers: { Authorization: `Bearer ${token}` } };
   
   // Sesuaikan dengan nama rute di backend-mu (biasanya /api/contacts)
-  const API_URL = 'http://localhost:5000/api/contacts'; 
+  const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contacts`; 
 
   const fetchMessages = async () => {
     setIsLoading(true);

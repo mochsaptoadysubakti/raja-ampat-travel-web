@@ -27,7 +27,7 @@ const ManageGallery = () => {
   const fetchGalleries = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/gallery', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/gallery`, config);
       const fetchedData = response.data.data || response.data || [];
       setGalleries(Array.isArray(fetchedData) ? fetchedData : []);
     } catch (error) {
@@ -60,7 +60,7 @@ const ManageGallery = () => {
         await axios.put(`http://localhost:5000/api/gallery/${editingId}`, payload, config);
         alert('Data galeri diperbarui!');
       } else {
-        await axios.post('http://localhost:5000/api/gallery', payload, config);
+        await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/gallery`, payload, config);
         alert('Data galeri ditambahkan!');
       }
       resetForm();

@@ -24,7 +24,7 @@ const ManageBlog = () => {
   const fetchBlogs = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/blogs', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`, config);
       const fetchedData = response.data.data || [];
       setBlogs(Array.isArray(fetchedData) ? fetchedData : []);
     } catch (error) {
@@ -46,7 +46,7 @@ const ManageBlog = () => {
         await axios.put(`http://localhost:5000/api/blogs/${editingId}`, formData, config);
         alert('Artikel berhasil diperbarui!');
       } else {
-        await axios.post('http://localhost:5000/api/blogs', formData, config);
+        await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`, formData, config);
         alert('Artikel berhasil ditambahkan!');
       }
       resetForm();

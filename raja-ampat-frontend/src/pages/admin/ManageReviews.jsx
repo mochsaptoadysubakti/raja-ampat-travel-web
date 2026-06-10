@@ -26,16 +26,16 @@ const ManageReviews = () => {
     setIsLoading(true);
     try {
       // 1. Ambil data Reviews (PERBAIKAN: Hapus .data ekstra)
-      const resReviews = await axios.get('http://localhost:5000/api/reviews', config);
+      const resReviews = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/reviews`, config);
       setReviews(Array.isArray(resReviews.data) ? resReviews.data : (resReviews.data.data || []));
 
       // 2. Ambil data Paket Tour (untuk Dropdown)
-      const resPackages = await axios.get('http://localhost:5000/api/tour_packages', config);
+      const resPackages = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages`, config);
       setPackages(Array.isArray(resPackages.data) ? resPackages.data : (resPackages.data.data || []));
 
       // 3. Ambil data Users (untuk Dropdown)
       try {
-        const resUsers = await axios.get('http://localhost:5000/api/users', config);
+        const resUsers = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users`, config);
         setUsers(Array.isArray(resUsers.data) ? resUsers.data : (resUsers.data.data || []));
       } catch (userErr) {
         console.warn("API Users belum tersedia atau gagal dimuat.", userErr);
@@ -56,7 +56,7 @@ const ManageReviews = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/reviews', formData, config);
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/reviews`, formData, config);
       alert('Review manual berhasil ditambahkan!');
       resetForm();
       fetchData(); // Refresh semua data

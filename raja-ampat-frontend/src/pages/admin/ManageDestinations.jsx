@@ -26,7 +26,7 @@ const ManageDestinations = () => {
   const fetchDestinations = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/destinations', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations`, config);
       const fetchedData = response.data.data || [];
       setDestinations(Array.isArray(fetchedData) ? fetchedData : []);
     } catch (error) {
@@ -48,7 +48,7 @@ const ManageDestinations = () => {
         await axios.put(`http://localhost:5000/api/destinations/${editingId}`, formData, config);
         alert('Destinasi diperbarui!');
       } else {
-        await axios.post('http://localhost:5000/api/destinations', formData, config);
+        await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations`, formData, config);
         alert('Destinasi ditambahkan!');
       }
       resetForm();

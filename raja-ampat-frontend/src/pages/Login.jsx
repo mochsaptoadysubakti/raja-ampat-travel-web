@@ -36,7 +36,7 @@ const Login = () => {
 
     try {
       // Menembak data ke API Login yang ada di backend
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`, {
         email: formData.email,
         password: formData.password
       });

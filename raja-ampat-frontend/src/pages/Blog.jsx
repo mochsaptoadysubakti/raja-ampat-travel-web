@@ -28,7 +28,7 @@ const Blog = () => {
     // Fetch Artikel Blog
     const fetchBlogs = async () => {
       try {
-        const response = await axiosInstance.get('http://localhost:5000/api/blogs'); 
+        const response = await axiosInstance.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`); 
         const dataArray = response.data?.data || response.data || [];
         if (Array.isArray(dataArray)) {
           setAllBlogs(dataArray);

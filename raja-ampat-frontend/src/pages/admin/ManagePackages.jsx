@@ -37,7 +37,7 @@ const ManagePackages = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const resDest = await axios.get('http://localhost:5000/api/destinations', config);
+      const resDest = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations`, config);
       const destData = resDest.data.data || resDest.data || [];
       setDestinations(Array.isArray(destData) ? destData : []);
     } catch (error) {
@@ -45,7 +45,7 @@ const ManagePackages = () => {
     }
 
     try {
-      const resPkg = await axios.get('http://localhost:5000/api/tour_packages', config);
+      const resPkg = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages`, config);
       const pkgData = resPkg.data.data || resPkg.data || [];
       setPackages(Array.isArray(pkgData) ? pkgData : []);
     } catch (error) {
@@ -119,7 +119,7 @@ const ManagePackages = () => {
         await axios.put(`http://localhost:5000/api/tour_packages/${editingId}`, payload, config);
         alert('Paket, Fasilitas & Jadwal berhasil diperbarui!');
       } else {
-        await axios.post('http://localhost:5000/api/tour_packages', payload, config);
+        await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages`, payload, config);
         alert('Paket, Fasilitas & Jadwal berhasil ditambahkan!');
       }
       resetForm();
