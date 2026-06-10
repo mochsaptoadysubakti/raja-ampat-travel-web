@@ -65,6 +65,9 @@ const Home = () => {
   const [selectedDest, setSelectedDest] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Set Base URL agar otomatis mendeteksi environment (Railway vs Local)
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   useEffect(() => {
     const fullText = "Jelajahi \nRaja Ampat";
     let index = 0;
@@ -86,7 +89,7 @@ const Home = () => {
 
     const fetchDestinations = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/destinations');
+        const response = await axios.get(`${baseUrl}/api/destinations`);
         const dataArray = response.data.data || response.data || [];
         if (Array.isArray(dataArray)) {
           setDestinations(dataArray.slice(0, 4));
@@ -98,7 +101,7 @@ const Home = () => {
 
     const fetchPackages = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/tour_packages'); 
+        const response = await axios.get(`${baseUrl}/api/tour_packages`); 
         const dataArray = response.data.data || response.data || [];
         if (Array.isArray(dataArray) && dataArray.length > 0) {
           const featuredPackages = dataArray.filter(pkg => 
@@ -116,7 +119,7 @@ const Home = () => {
 
     const fetchGalleries = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/gallery'); 
+        const response = await axios.get(`${baseUrl}/api/gallery`); 
         const dataArray = response.data.data || response.data || [];
         if (Array.isArray(dataArray)) {
           setGalleries(dataArray.slice(0, 12)); 
@@ -128,7 +131,7 @@ const Home = () => {
 
     const fetchReviews = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/reviews');
+        const response = await axios.get(`${baseUrl}/api/reviews`);
         const dataArray = response.data.data || response.data || [];
         if (Array.isArray(dataArray) && dataArray.length > 0) {
           setReviews(dataArray.slice(0, 3)); 
@@ -149,7 +152,7 @@ const Home = () => {
     fetchPackages();
     fetchGalleries();
     fetchReviews();
-  }, []);
+  }, [baseUrl]);
 
   const handleLogout = () => {
     setShowLogoutAnim(true);
@@ -170,7 +173,7 @@ const Home = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/contacts', contactForm);
+      await axios.post(`${baseUrl}/api/contacts`, contactForm);
       setIsSuccess(true);
       setContactForm({ name: '', email: '', message: '' }); 
     } catch (error) {
