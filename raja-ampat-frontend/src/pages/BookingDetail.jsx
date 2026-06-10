@@ -31,8 +31,9 @@ export default function BookingDetail() {
     useEffect(() => {
         // Gunakan URL Sandbox
         const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js"; 
-        // WAJIB GANTI: Masukkan Client Key Sandbox kamu di sini (Awalan SB-)
-        const clientKey = "SB-Mid-client-xxxxx_Ganti_Dengan_Client_Key_Mu_xxxxx"; 
+        
+        // ✅ MENGAMBIL CLIENT KEY SECARA DINAMIS (DARI .ENV LOKAL ATAU RAILWAY)
+        const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY; 
 
         const script = document.createElement("script");
         script.src = snapScript;
@@ -73,7 +74,7 @@ export default function BookingDetail() {
         if (!pkgDetail && id) {
             const fetchPackageDetail = async () => {
                 try {
-                    const response = await axios.get(`http://localhost:5000/api/tour_packages/${id}`);
+                    const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages/${id}`);
                     let data = response.data?.data || response.data;
                     if (Array.isArray(data)) data = data.length > 0 ? data[0] : null;
                     setPkgDetail(data);
