@@ -23,6 +23,12 @@ const UserProfile = () => {
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null); // State untuk Pop-up
 
+  // --- NEW STATE: POP-UP REVIEW/ULASAN ---
+  const [bookingToReview, setBookingToReview] = useState(null); // Menyimpan objek paket yang akan direview
+  const [reviewRating, setReviewRating] = useState(5); // Rating bintang default 5
+  const [reviewComment, setReviewComment] = useState(""); // Komentar ulasan
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
   // Cek Sesi Login Saat Halaman Dimuat
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -98,6 +104,45 @@ const UserProfile = () => {
       alert(`Gagal menyimpan: ${errorMsg}`);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // --- FUNGSI KLIK TOMBOL REVIEW ---
+  const handleOpenReviewModal = (booking) => {
+    setBookingToReview(booking);
+    setReviewRating(5); // Reset ke bintang 5 saat membuka pop-up baru
+    setReviewComment(""); // Kosongkan text ulasan sebelumnya
+  };
+
+  // --- FUNGSI SUBMIT ULASAN (POP-UP) ---
+  const handleSubmitReview = async () => {
+    if (!reviewComment.trim()) {
+      alert("Silakan tulis komentar ulasan Anda terlebih dahulu!");
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    try {
+      const token = localStorage.getItem('userToken');
+      const configHeaders = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+      // ✅ SUDAH DIAKTIFKAN: Mengirim data review ke Backend Database Railway
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/reviews`, {
+        booking_id: bookingToReview.id,
+        rating: reviewRating,
+        comment: reviewComment
+      }, configHeaders);
+
+      alert(`Terima kasih atas ulasan Anda! ❤️`);
+      setBookingToReview(null); // Tutup pop-up modal setelah sukses submit
+      
+      // Opsional: Refresh riwayat pesanan (barangkali ada status berubah dsb)
+      fetchBookingHistory(user.id, token);
+    } catch (error) {
+      console.error("Gagal mengirim ulasan:", error);
+      alert("Terjadi kesalahan saat mengirim ulasan ke server.");
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -214,6 +259,10 @@ const UserProfile = () => {
           .btn-outline-download { border: 1px solid #CBD5E1; color: #475569; background: transparent; border-radius: 8px; font-weight: 600; padding: 8px 16px; width: 100%; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; }
           .btn-outline-download:hover { background: #F8F9FA; color: #0F172A; }
 
+          /* --- STYLING BUTTON REVIEW BARU --- */
+          .btn-outline-review { border: 1px solid #FFB76C; color: #111; background: transparent; border-radius: 8px; font-weight: 600; padding: 8px 16px; width: 100%; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; }
+          .btn-outline-review:hover { background: #FFF5EC; color: #FFB76C; }
+
           .btn-close-custom { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; transition: 0.2s;}
           .btn-close-custom:hover { background: #e2e8f0; color: #e53e3e; }
 
@@ -255,6 +304,7 @@ const UserProfile = () => {
         </div>
       )}
 
+      {/* POP-UP DETAIL TRANSKASI */}
       {selectedBooking && (
         <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={() => setSelectedBooking(null)}>
           <div className="modal-content-large" onClick={(e) => e.stopPropagation()}>
@@ -316,6 +366,63 @@ const UserProfile = () => {
                 <i className="bi bi-whatsapp"></i> Hubungi Admin (083189916740)
               </a>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- NEW MODAL: POP-UP BERI ULASAN / REVIEW --- */}
+      {bookingToReview && (
+        <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={() => setBookingToReview(null)}>
+          <div className="modal-content-large" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h4 className="fw-bold mb-0 text-dark">Beri Ulasan Paket</h4>
+              <button className="btn-close-custom" onClick={() => setBookingToReview(null)}>✕</button>
+            </div>
+            
+            <p className="text-muted small mb-4">
+              Bagikan pengalaman seru Anda setelah berwisata di <strong>{bookingToReview.tour_name || bookingToReview.title || bookingToReview.package_name || "Paket Wisata"}</strong>.
+            </p>
+
+            {/* Area Bintang Rating Interaktif */}
+            <div className="text-center mb-4 p-3 bg-light rounded-4 border">
+              <label className="form-label-custom d-block mb-2 text-dark">Rating Kepuasan Anda</label>
+              <div className="d-flex justify-content-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <i
+                    key={star}
+                    className={`bi ${star <= reviewRating ? "bi-star-fill text-warning" : "bi-star text-muted"} fs-2`}
+                    style={{ cursor: "pointer", transition: "transform 0.1s" }}
+                    onClick={() => setReviewRating(star)}
+                    onMouseOver={(e) => e.target.style.transform = 'scale(1.2)'}
+                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                  ></i>
+                ))}
+              </div>
+              <span className="badge bg-white border text-dark mt-2 fw-bold px-3">
+                {reviewRating === 5 ? "🤩 Sangat Puas (5/5)" :
+                 reviewRating === 4 ? "😊 Puas (4/5)" :
+                 reviewRating === 3 ? "😐 Cukup (3/5)" :
+                 reviewRating === 2 ? "🙁 Kurang Puas (2/5)" : "😭 Sangat Kecewa (1/5)"}
+              </span>
+            </div>
+
+            {/* Input Komentar */}
+            <div className="mb-4">
+              <label className="form-label-custom">Komentar / Catatan Review</label>
+              <textarea
+                className="form-control-custom"
+                rows="4"
+                placeholder="Ceritakan detail keseruan pemandangan, kenyamanan penginapan, keramahan guide lokal, dll..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                required
+              ></textarea>
+            </div>
+
+            {/* Tombol Aksi */}
+            <button className="btn-primary-custom w-100 py-3 rounded-3" onClick={handleSubmitReview} disabled={isSubmittingReview}>
+              {isSubmittingReview ? "Mengirim..." : "Kirim Ulasan Sekarang"}
+            </button>
           </div>
         </div>
       )}
@@ -442,7 +549,6 @@ const UserProfile = () => {
                   <div>
                     {bookings.map((booking, index) => {
                       const statusInfo = getStatusDisplay(booking.status);
-                      // Gunakan gambar dari database jika ada, jika tidak gunakan gambar default
                       const imageUrl = booking.image || booking.tour_image || booking.thumbnail || "https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?auto=format&fit=crop&w=600&q=80";
 
                       return (
@@ -494,11 +600,18 @@ const UserProfile = () => {
                                 Lihat Detail <i className="bi bi-arrow-right ms-1"></i>
                               </button>
                               
-                              {/* Tampilkan Download Tiket Hanya Jika Terkonfirmasi */}
+                              {/* Tampilkan Download Tiket & Beri Ulasan Hanya Jika Terkonfirmasi */}
                               {statusInfo.label === 'Terkonfirmasi' && (
-                                <button className="btn-outline-download" onClick={() => alert("Fitur download tiket sedang dikembangkan!")}>
-                                  Download Tiket <i className="bi bi-download"></i>
-                                </button>
+                                <>
+                                  <button className="btn-outline-download" onClick={() => alert("Fitur download tiket sedang dikembangkan!")}>
+                                    Download Tiket <i className="bi bi-download"></i>
+                                  </button>
+                                  
+                                  {/* ✅ BUTTON BERI ULASAN BARU */}
+                                  <button className="btn-outline-review" onClick={() => handleOpenReviewModal(booking)}>
+                                    Beri Ulasan <i className="bi bi-star-fill text-warning"></i>
+                                  </button>
+                                </>
                               )}
                             </div>
                           </div>
