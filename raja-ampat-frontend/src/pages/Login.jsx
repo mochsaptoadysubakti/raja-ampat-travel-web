@@ -35,9 +35,8 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // PERBAIKAN DI SINI: Menggunakan VITE_API_URL dari Railway atau fallback ke localhost
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await axios.post(`${baseUrl}/api/auth/login`, {
+      // Menembak data ke API Login yang ada di backend
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
         email: formData.email,
         password: formData.password
       });
