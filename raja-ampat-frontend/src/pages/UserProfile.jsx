@@ -24,10 +24,13 @@ const UserProfile = () => {
   const [selectedBooking, setSelectedBooking] = useState(null); // State untuk Pop-up
 
   // --- STATE: POP-UP REVIEW/ULASAN ---
-  const [bookingToReview, setBookingToReview] = useState(null); // Menyimpan objek paket yang akan direview
-  const [reviewRating, setReviewRating] = useState(5); // Rating bintang default 5
-  const [reviewComment, setReviewComment] = useState(""); // Komentar ulasan
+  const [bookingToReview, setBookingToReview] = useState(null); 
+  const [reviewRating, setReviewRating] = useState(5); 
+  const [reviewComment, setReviewComment] = useState(""); 
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  
+  // ✅ NEW STATE: Animasi Sukses Kirim Ulasan
+  const [showReviewSuccess, setShowReviewSuccess] = useState(false);
 
   // Cek Sesi Login Saat Halaman Dimuat
   useEffect(() => {
@@ -124,10 +127,8 @@ const UserProfile = () => {
       const token = localStorage.getItem('userToken');
       const configHeaders = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-      // Ambil package_id dari objek booking secara fleksibel
       const targetPackageId = bookingToReview.package_id || bookingToReview.tour_package_id || bookingToReview.id;
 
-      // ✅ DIPERBAIKI: Mengirim payload parameter yang 100% cocok dengan Controller Backend kamu
       await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/reviews`, {
         user_id: user.id,
         package_id: targetPackageId,
@@ -135,10 +136,16 @@ const UserProfile = () => {
         comment: reviewComment
       }, configHeaders);
 
-      alert(`Terima kasih atas ulasan Anda! ❤️`);
-      setBookingToReview(null); // Tutup pop-up modal setelah sukses submit
+      setBookingToReview(null); // Tutup pop-up modal input ulasan
       
-      // Refresh riwayat pesanan jika diperlukan
+      // ✅ Tampilkan Pop-up Animasi Cantik
+      setShowReviewSuccess(true);
+      
+      // Tutup otomatis setelah 2.5 detik
+      setTimeout(() => {
+        setShowReviewSuccess(false);
+      }, 2500);
+      
       fetchBookingHistory(user.id, token);
     } catch (error) {
       console.error("Gagal mengirim ulasan:", error);
@@ -207,6 +214,9 @@ const UserProfile = () => {
           .spinner-custom { width: 50px; height: 50px; border: 4px solid rgba(255, 183, 108, 0.3); border-top-color: #FFB76C; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
           
           .success-checkmark { width: 60px; height: 60px; border-radius: 50%; background-color: #10B981; color: white; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; margin: 0 auto 20px auto; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
+
+          /* Star Icon Animation */
+          .star-checkmark { width: 60px; height: 60px; border-radius: 50%; background-color: #FFB76C; color: white; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; margin: 0 auto 20px auto; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 10px 20px rgba(255, 183, 108, 0.4); }
 
           @keyframes spin { 100% { transform: rotate(360deg); } }
           @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -303,6 +313,17 @@ const UserProfile = () => {
             <div className="spinner-custom"></div>
             <h4 className="fw-bold text-dark mb-2">Sampai Jumpa!</h4>
             <p className="text-secondary small mb-0">Sedang mengeluarkan akun Anda...</p>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ POP-UP ANIMASI SUKSES REVIEW */}
+      {showReviewSuccess && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content-small" style={{ animation: 'scaleUp 0.3s forwards' }}>
+            <div className="star-checkmark"><i className="bi bi-star-fill"></i></div>
+            <h4 className="fw-bold text-dark mb-2">Terima Kasih!</h4>
+            <p className="text-secondary small mb-0">Ulasan seru Anda telah berhasil dikirim dan sangat berarti bagi kami.</p>
           </div>
         </div>
       )}
@@ -567,7 +588,7 @@ const UserProfile = () => {
 
                           {/* Detail Info Tengah */}
                           <div className="flex-grow-1 py-1">
-                            <span className="badge bg-light text-secondary border mb-2 px-2 py-1" style={{ fontSize: '0.75rem'}}>ID: {booking.id}</span>
+                            <span className="badge bg-light text-secondary border mb-2 px-2 py-1" style={{ fontSize: '0.75rem'}}>ID: {booking.id || 20 + index}</span>
                             <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem', lineHeight: '1.4' }}>
                               {booking.tour_name || booking.title || booking.package_name || "Paket Wisata"}
                             </h5>
@@ -603,6 +624,7 @@ const UserProfile = () => {
                                 Lihat Detail <i className="bi bi-arrow-right ms-1"></i>
                               </button>
                               
+                              {/* Tampilkan Download Tiket & Beri Ulasan Hanya Jika Terkonfirmasi */}
                               {statusInfo.label === 'Terkonfirmasi' && (
                                 <>
                                   <button className="btn-outline-download" onClick={() => alert("Fitur download tiket sedang dikembangkan!")}>
