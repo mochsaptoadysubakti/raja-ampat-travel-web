@@ -3,12 +3,20 @@ const pool = require('../config/db');
 // 1. Mengambil Semua Review (Untuk Admin / Halaman Depan)
 const getAllReviews = async () => {
     const result = await pool.query(`
-        SELECT r.id, u.name AS user_name, p.title AS package_name, 
-               r.rating, r.comment, r.created_at 
+        SELECT 
+            r.id, 
+            r.user_id,
+            r.package_id,
+            u.name AS customer_name,  -- Diubah agar cocok dengan Frontend Admin
+            u.email AS customer_email, -- Ditambahkan agar email muncul di Admin
+            p.title AS package_name, 
+            r.rating, 
+            r.comment, 
+            r.created_at 
         FROM reviews r
-        JOIN users u ON r.user_id = u.id
-        JOIN tour_packages p ON r.package_id = p.id
-        ORDER BY r.id DESC
+        LEFT JOIN users u ON r.user_id = u.id
+        LEFT JOIN tour_packages p ON r.package_id = p.id
+        ORDER BY r.created_at DESC
     `);
     return result.rows;
 };
