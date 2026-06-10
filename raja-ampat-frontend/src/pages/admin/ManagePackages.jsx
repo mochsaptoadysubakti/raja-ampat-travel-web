@@ -116,7 +116,8 @@ const ManagePackages = () => {
       };
 
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/tour_packages/${editingId}`, payload, config);
+        // ✅ DIPERBAIKI: Menggunakan variabel environment untuk EDIT
+        await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages/${editingId}`, payload, config);
         alert('Paket, Fasilitas & Jadwal berhasil diperbarui!');
       } else {
         await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages`, payload, config);
@@ -191,7 +192,8 @@ const ManagePackages = () => {
   const executeDelete = async () => {
     if (!packageToDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/api/tour_packages/${packageToDelete.id}`, config);
+      // ✅ DIPERBAIKI: Menggunakan variabel environment untuk DELETE
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages/${packageToDelete.id}`, config);
       setShowDeleteModal(false);
       setPackageToDelete(null);
       fetchData();
