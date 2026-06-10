@@ -56,8 +56,8 @@ const ManageGallery = () => {
 
     try {
       if (editingId) {
-        // PERBAIKAN 1: Pastikan editingId tidak undefined
-        await axios.put(`http://localhost:5000/api/gallery/${editingId}`, payload, config);
+        // ✅ DIPERBAIKI: Menggunakan variabel environment untuk EDIT
+        await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/gallery/${editingId}`, payload, config);
         alert('Data galeri diperbarui!');
       } else {
         await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/gallery`, payload, config);
@@ -99,7 +99,8 @@ const ManageGallery = () => {
     const targetId = galleryToDelete.id || galleryToDelete._id;
     
     try {
-      await axios.delete(`http://localhost:5000/api/gallery/${targetId}`, config);
+      // ✅ DIPERBAIKI: Menggunakan variabel environment untuk DELETE
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/gallery/${targetId}`, config);
       setShowDeleteModal(false);
       setGalleryToDelete(null);
       fetchGalleries();

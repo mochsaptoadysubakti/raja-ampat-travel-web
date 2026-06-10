@@ -45,7 +45,8 @@ const ManageDestinations = () => {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/destinations/${editingId}`, formData, config);
+        // ✅ DIPERBAIKI: Menggunakan variabel environment untuk EDIT
+        await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations/${editingId}`, formData, config);
         alert('Destinasi diperbarui!');
       } else {
         await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations`, formData, config);
@@ -77,7 +78,8 @@ const ManageDestinations = () => {
   const executeDelete = async () => {
     if (!destToDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/api/destinations/${destToDelete.id}`, config);
+      // ✅ DIPERBAIKI: Menggunakan variabel environment untuk DELETE
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/destinations/${destToDelete.id}`, config);
       setShowDeleteModal(false);
       setDestToDelete(null);
       fetchDestinations();

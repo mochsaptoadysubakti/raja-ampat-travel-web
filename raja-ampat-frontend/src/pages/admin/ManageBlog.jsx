@@ -43,7 +43,8 @@ const ManageBlog = () => {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/blogs/${editingId}`, formData, config);
+        // ✅ DIPERBAIKI: Menggunakan variabel environment
+        await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs/${editingId}`, formData, config);
         alert('Artikel berhasil diperbarui!');
       } else {
         await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`, formData, config);
@@ -74,7 +75,8 @@ const ManageBlog = () => {
   const executeDelete = async () => {
     if (!blogToDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/api/blogs/${blogToDelete.id}`, config);
+      // ✅ DIPERBAIKI: Menggunakan variabel environment
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs/${blogToDelete.id}`, config);
       setShowDeleteModal(false);
       setBlogToDelete(null);
       fetchBlogs();
