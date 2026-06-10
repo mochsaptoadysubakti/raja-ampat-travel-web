@@ -26,15 +26,16 @@ export default function BlogDetail() {
             }
         }
 
-        const fetchBlogData = async () => {
+const fetchBlogData = async () => {
             setLoading(true);
             try {
-                const res = await axios.get(`http://localhost:5000/api/blogs/${id}`);
+                // ✅ DIPERBAIKI: Gunakan variabel environment agar bisa diakses di Railway
+                const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs/${id}`);
                 const data = res.data?.data || res.data;
                 setBlog(data);
 
-                // Ambil artikel terkait (semua blog lalu filter bukan id ini)
-                const allRes = await axios.get(`http://localhost:5000/api/blogs`);
+                // ✅ DIPERBAIKI: Gunakan variabel environment juga untuk artikel terkait
+                const allRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`);
                 const allData = allRes.data?.data || allRes.data || [];
                 const filtered = Array.isArray(allData)
                     ? allData.filter((b) => String(b.id) !== String(id)).slice(0, 3)
