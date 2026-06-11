@@ -116,7 +116,7 @@ export default function BlogDetail() {
                 .nav-link-custom { transition: color 0.3s ease; color: #555; }
                 .nav-link-custom:hover { color: #FFB76C !important; }
 
-                .social-link { transition: all 0.3s ease; color: #000; }
+                .social-link { transition: all 0.3s ease; color: #111 !important; }
                 .social-link:hover { transform: translateX(5px); color: #ffffff !important; }
 
                 .category-badge { background-color: #FFB76C; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 0; font-family: 'Inter', sans-serif; letter-spacing: 0.02em; }
@@ -152,7 +152,9 @@ export default function BlogDetail() {
                 <div className={`align-items-center gap-4 ms-lg-auto d-lg-flex ${isMobileMenuOpen ? 'nav-actions-mobile' : 'd-none'}`}>
                   <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/" onClick={() => setIsMobileMenuOpen(false)}>Beranda</Link>
                   <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
-                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/destinations" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
+                  
+                  {/* ✅ Link diubah dari /destinations menjadi /destinasi */}
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/destinasi" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
                   <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
                   
                   {user ? (
@@ -295,13 +297,14 @@ export default function BlogDetail() {
                             <div className="col-lg-3 px-lg-3">
                                 <h6 className="fw-bold mb-2 text-dark" style={{ fontFamily: 'Poppins, sans-serif' }}>Ikuti Kami</h6>
                                 <div className="d-flex flex-column align-items-center fw-medium mt-2" style={{ gap: '12px', fontSize: '0.9rem' }}>
-                                    <a href="https://instagram.com/ampatheia.id" target="_blank" rel="noopener noreferrer" className="social-link text-decoration-none d-flex align-items-center gap-2">
+                                    {/* ✅ DITAMBAHKAN class text-dark */}
+                                    <a href="https://instagram.com/ampatheia.id" target="_blank" rel="noopener noreferrer" className="social-link text-dark text-decoration-none d-flex align-items-center gap-2">
                                         <FaInstagram size={22} /><span>ampatheia.id</span>
                                     </a>
-                                    <a href="https://facebook.com/ampatheia.id" target="_blank" rel="noopener noreferrer" className="social-link text-decoration-none d-flex align-items-center gap-2">
+                                    <a href="https://facebook.com/ampatheia.id" target="_blank" rel="noopener noreferrer" className="social-link text-dark text-decoration-none d-flex align-items-center gap-2">
                                         <FaFacebook size={22} /><span>ampatheia.id</span>
                                     </a>
-                                    <a href="https://ampatheia.id" target="_blank" rel="noopener noreferrer" className="social-link text-decoration-none d-flex align-items-center gap-2">
+                                    <a href="https://ampatheia.id" target="_blank" rel="noopener noreferrer" className="social-link text-dark text-decoration-none d-flex align-items-center gap-2">
                                         <FaGlobe size={22} /><span>ampatheia.id</span>
                                     </a>
                                 </div>
