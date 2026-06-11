@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { jsPDF } from "jspdf"; // ✅ IMPORT LIBRARY PDF
 
 const UserProfile = () => {
   const navigate = useNavigate();
 
   // --- STATE USER & UI ---
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState("akun"); // 'akun' atau 'riwayat'
+  const [activeTab, setActiveTab] = useState("akun"); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutAnim, setShowLogoutAnim] = useState(false);
   
@@ -21,15 +22,13 @@ const UserProfile = () => {
   // --- STATE RIWAYAT PESANAN & MODAL ---
   const [bookings, setBookings] = useState([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
-  const [selectedBooking, setSelectedBooking] = useState(null); // State untuk Pop-up
+  const [selectedBooking, setSelectedBooking] = useState(null); 
 
   // --- STATE: POP-UP REVIEW/ULASAN ---
   const [bookingToReview, setBookingToReview] = useState(null); 
   const [reviewRating, setReviewRating] = useState(5); 
   const [reviewComment, setReviewComment] = useState(""); 
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  
-  // ✅ NEW STATE: Animasi Sukses Kirim Ulasan
   const [showReviewSuccess, setShowReviewSuccess] = useState(false);
 
   // Cek Sesi Login Saat Halaman Dimuat
@@ -99,13 +98,81 @@ const UserProfile = () => {
 
     } catch (error) {
       console.error("Detail Error Update Profil:", error.response || error);
-      const errorMsg = error.response?.data?.message 
-                    || error.response?.data?.error 
-                    || "Gagal menyimpan perubahan.";
-      alert(`Gagal menyimpan: ${errorMsg}`);
+      alert(`Gagal menyimpan profil.`);
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // --- FUNGSI DOWNLOAD TIKET PDF ---
+  const handleDownloadTicket = (booking) => {
+    const doc = new jsPDF();
+    const trxId = booking.id || booking.booking_id || "000";
+    const packageName = booking.tour_name || booking.title || booking.package_name || "Paket Wisata Ampatheia";
+    const bookingDate = booking.booking_date ? new Date(booking.booking_date).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : "-";
+    const totalPrice = `Rp ${Number(booking.total_price || 0).toLocaleString('id-ID')}`;
+
+    // Desain Header PDF
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.setTextColor(255, 183, 108); // Warna oranye khas Ampatheia
+    doc.text("Ampatheia.", 20, 30);
+    
+    doc.setFontSize(14);
+    doc.setTextColor(50, 50, 50);
+    doc.text("E-TICKET PERJALANAN WISATA", 20, 40);
+
+    // Garis Pembatas
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, 45, 190, 45);
+
+    // Info Transaksi
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`ID Transaksi : TRX-${trxId}`, 20, 55);
+    doc.text(`Status       : LUNAS / TERKONFIRMASI`, 20, 62);
+    
+    // Data Pemesan
+    doc.setFont("helvetica", "bold");
+    doc.text("Data Pemesan", 20, 75);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Nama Lengkap   : ${user.name}`, 20, 83);
+    doc.text(`Email          : ${user.email}`, 20, 90);
+    doc.text(`No. Handphone  : ${user.phone || user.no_hp || "-"}`, 20, 97);
+
+    // Detail Paket
+    doc.setFont("helvetica", "bold");
+    doc.text("Detail Paket Wisata", 20, 110);
+    doc.setFont("helvetica", "normal");
+    
+    // Auto-wrap nama paket kalau terlalu panjang
+    const splitPackageName = doc.splitTextToSize(packageName, 130);
+    doc.text(`Nama Paket     : ${splitPackageName[0]}`, 20, 118);
+    if(splitPackageName.length > 1) {
+      doc.text(`                 ${splitPackageName[1]}`, 20, 125);
+    }
+    
+    const yOffset = splitPackageName.length > 1 ? 132 : 125;
+    doc.text(`Tanggal Pergi  : ${bookingDate}`, 20, yOffset);
+    doc.text(`Jumlah Tamu    : ${booking.total_people || 1} Orang`, 20, yOffset + 7);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Total Harga    : ${totalPrice}`, 20, yOffset + 14);
+
+    // Garis Pembatas Footer
+    doc.line(20, yOffset + 25, 190, yOffset + 25);
+
+    // Footer Catatan
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(100, 100, 100);
+    doc.text("Catatan:", 20, yOffset + 35);
+    doc.text("1. Harap tunjukkan E-Ticket ini (digital/cetak) kepada petugas kami di lokasi titik kumpul.", 20, yOffset + 40);
+    doc.text("2. Simpan tiket ini baik-baik sebagai bukti pembayaran yang sah.", 20, yOffset + 45);
+    doc.text("3. Terima kasih telah memilih Ampatheia sebagai partner perjalanan Anda ke Raja Ampat.", 20, yOffset + 50);
+
+    // Simpan file
+    doc.save(`Ampatheia_Ticket_TRX${trxId}.pdf`);
   };
 
   // --- FUNGSI KLIK TOMBOL REVIEW ---
@@ -136,12 +203,9 @@ const UserProfile = () => {
         comment: reviewComment
       }, configHeaders);
 
-      setBookingToReview(null); // Tutup pop-up modal input ulasan
-      
-      // ✅ Tampilkan Pop-up Animasi Cantik
+      setBookingToReview(null); 
       setShowReviewSuccess(true);
       
-      // Tutup otomatis setelah 2.5 detik
       setTimeout(() => {
         setShowReviewSuccess(false);
       }, 2500);
@@ -156,7 +220,6 @@ const UserProfile = () => {
     }
   };
 
-  // Fungsi Logout
   const handleLogout = () => {
     setShowLogoutAnim(true);
     localStorage.removeItem('userToken');
@@ -167,30 +230,14 @@ const UserProfile = () => {
     }, 2000); 
   };
 
-  // Helper Fungsi Status Badge
   const getStatusDisplay = (status) => {
     const statusLower = (status || '').toLowerCase();
     if (statusLower.includes('confirmed') || statusLower.includes('lunas') || statusLower.includes('success') || statusLower.includes('settlement')) {
-      return { 
-        badgeClass: 'badge-confirmed', 
-        label: 'Terkonfirmasi', 
-        icon: 'bi-check-circle',
-        btnClass: 'btn-outline-confirmed'
-      };
+      return { badgeClass: 'badge-confirmed', label: 'Terkonfirmasi', icon: 'bi-check-circle', btnClass: 'btn-outline-confirmed' };
     } else if (statusLower.includes('cancel') || statusLower.includes('batal')) {
-      return { 
-        badgeClass: 'badge-cancelled', 
-        label: 'Dibatalkan', 
-        icon: 'bi-x-circle',
-        btnClass: 'btn-outline-secondary'
-      };
+      return { badgeClass: 'badge-cancelled', label: 'Dibatalkan', icon: 'bi-x-circle', btnClass: 'btn-outline-secondary' };
     }
-    return { 
-      badgeClass: 'badge-pending', 
-      label: 'Pending', 
-      icon: 'bi-clock',
-      btnClass: 'btn-outline-pending'
-    };
+    return { badgeClass: 'badge-pending', label: 'Pending', icon: 'bi-clock', btnClass: 'btn-outline-pending' };
   };
 
   if (!user) return null;
@@ -215,7 +262,6 @@ const UserProfile = () => {
           
           .success-checkmark { width: 60px; height: 60px; border-radius: 50%; background-color: #10B981; color: white; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; margin: 0 auto 20px auto; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
 
-          /* Star Icon Animation */
           .star-checkmark { width: 60px; height: 60px; border-radius: 50%; background-color: #FFB76C; color: white; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; margin: 0 auto 20px auto; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 10px 20px rgba(255, 183, 108, 0.4); }
 
           @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -224,7 +270,7 @@ const UserProfile = () => {
           @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
           .profile-sidebar { background: #fff; border-radius: 20px; padding: 30px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
-          .profile-sidebar-container { text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 20px; }
+          .profile-avatar-container { text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 20px; }
           .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #F4F7FE; box-shadow: 0 5px 15px rgba(255, 183, 108, 0.3); margin-bottom: 15px; }
           
           .profile-menu-item { display: flex; align-items: center; gap: 15px; padding: 14px 20px; border-radius: 12px; color: #64748B; font-weight: 600; text-decoration: none; transition: all 0.3s; cursor: pointer; margin-bottom: 8px; border: 1px solid transparent; }
@@ -249,7 +295,6 @@ const UserProfile = () => {
           .btn-save-custom { background-color: #111; color: #fff; font-weight: 600; border-radius: 8px; padding: 8px 24px; border: none; transition: all 0.3s; font-size: 0.9rem; }
           .btn-save-custom:hover { background-color: #FFB76C; color: #111; }
 
-          /* --- STYLING TIKET RIWAYAT PESANAN BARU --- */
           .history-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; margin-bottom: 24px; transition: all 0.3s; display: flex; gap: 24px; }
           .history-card:hover { border-color: #FFB76C; box-shadow: 0 10px 25px rgba(255, 183, 108, 0.15); }
           
@@ -272,7 +317,6 @@ const UserProfile = () => {
           .btn-outline-download { border: 1px solid #CBD5E1; color: #475569; background: transparent; border-radius: 8px; font-weight: 600; padding: 8px 16px; width: 100%; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; }
           .btn-outline-download:hover { background: #F8F9FA; color: #0F172A; }
 
-          /* --- STYLING BUTTON REVIEW BARU --- */
           .btn-outline-review { border: 1px solid #FFB76C; color: #111; background: transparent; border-radius: 8px; font-weight: 600; padding: 8px 16px; width: 100%; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; }
           .btn-outline-review:hover { background: #FFF5EC; color: #FFB76C; }
 
@@ -317,7 +361,6 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* ✅ POP-UP ANIMASI SUKSES REVIEW */}
       {showReviewSuccess && (
         <div className="modal-overlay" style={{ zIndex: 10000 }}>
           <div className="modal-content-small" style={{ animation: 'scaleUp 0.3s forwards' }}>
@@ -394,7 +437,7 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* --- NEW MODAL: POP-UP BERI ULASAN / REVIEW --- */}
+      {/* MODAL BERI ULASAN */}
       {bookingToReview && (
         <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={() => setBookingToReview(null)}>
           <div className="modal-content-large" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
@@ -407,7 +450,6 @@ const UserProfile = () => {
               Bagikan pengalaman seru Anda setelah berwisata di <strong>{bookingToReview.tour_name || bookingToReview.title || bookingToReview.package_name || "Paket Wisata"}</strong>.
             </p>
 
-            {/* Area Bintang Rating Interaktif */}
             <div className="text-center mb-4 p-3 bg-light rounded-4 border">
               <label className="form-label-custom d-block mb-2 text-dark">Rating Kepuasan Anda</label>
               <div className="d-flex justify-content-center gap-2">
@@ -430,20 +472,18 @@ const UserProfile = () => {
               </span>
             </div>
 
-            {/* Input Komentar */}
             <div className="mb-4">
               <label className="form-label-custom">Komentar / Catatan Review</label>
               <textarea
                 className="form-control-custom"
                 rows="4"
-                placeholder="Ceritakan detail keseruan pemandangan, kenyamanan penginapan, keramahan guide lokal, dll..."
+                placeholder="Ceritakan detail keseruan pemandangan, kenyamanan penginapan, dll..."
                 value={reviewComment}
                 onChange={(e) => setReviewComment(e.target.value)}
                 required
               ></textarea>
             </div>
 
-            {/* Tombol Aksi */}
             <button className="btn-primary-custom w-100 py-3 rounded-3" onClick={handleSubmitReview} disabled={isSubmittingReview}>
               {isSubmittingReview ? "Mengirim..." : "Kirim Ulasan Sekarang"}
             </button>
@@ -478,7 +518,6 @@ const UserProfile = () => {
       <div className="container mt-4">
         <div className="row g-lg-5">
           
-          {/* SIDEBAR MENU */}
           <div className="col-lg-3">
             <div className="profile-sidebar anim-fade-up">
               <div className="profile-avatar-container">
@@ -501,10 +540,8 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* KONTEN DINAMIS */}
           <div className="col-lg-9">
             
-            {/* TAB 1: INFORMASI AKUN */}
             {activeTab === 'akun' && (
               <div className="profile-content-card anim-fade-up" style={{ animationDelay: '0.1s' }}>
                 <div className="d-flex justify-content-between align-items-center mb-4">
@@ -558,7 +595,6 @@ const UserProfile = () => {
               </div>
             )}
 
-            {/* TAB 2: RIWAYAT PESANAN */}
             {activeTab === 'riwayat' && (
               <div className="profile-content-card anim-fade-up" style={{ animationDelay: '0.1s' }}>
                 <h3 className="section-title">Riwayat Pesanan</h3>
@@ -578,7 +614,6 @@ const UserProfile = () => {
                       return (
                         <div key={index} className="history-card">
                           
-                          {/* Gambar & Durasi */}
                           <div className="history-img-container">
                             <img src={imageUrl} alt={booking.tour_name} className="history-img" />
                             <div className="history-duration">
@@ -586,7 +621,6 @@ const UserProfile = () => {
                             </div>
                           </div>
 
-                          {/* Detail Info Tengah */}
                           <div className="flex-grow-1 py-1">
                             <span className="badge bg-light text-secondary border mb-2 px-2 py-1" style={{ fontSize: '0.75rem'}}>ID: {booking.id || 20 + index}</span>
                             <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem', lineHeight: '1.4' }}>
@@ -608,7 +642,6 @@ const UserProfile = () => {
                             </div>
                           </div>
 
-                          {/* Status, Harga, Actions Kanan */}
                           <div className="history-action-area d-flex flex-column justify-content-between align-items-lg-end" style={{ minWidth: '180px' }}>
                             <div className={statusInfo.badgeClass}>
                               <i className={`bi ${statusInfo.icon}`}></i> {statusInfo.label}
@@ -624,10 +657,10 @@ const UserProfile = () => {
                                 Lihat Detail <i className="bi bi-arrow-right ms-1"></i>
                               </button>
                               
-                              {/* Tampilkan Download Tiket & Beri Ulasan Hanya Jika Terkonfirmasi */}
+                              {/* TOMBOL PDF TIKET & REVIEW */}
                               {statusInfo.label === 'Terkonfirmasi' && (
                                 <>
-                                  <button className="btn-outline-download" onClick={() => alert("Fitur download tiket sedang dikembangkan!")}>
+                                  <button className="btn-outline-download" onClick={() => handleDownloadTicket(booking)}>
                                     Download Tiket <i className="bi bi-download"></i>
                                   </button>
                                   <button className="btn-outline-review" onClick={() => handleOpenReviewModal(booking)}>
