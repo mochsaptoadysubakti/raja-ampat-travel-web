@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { jsPDF } from "jspdf"; // ✅ IMPORT LIBRARY PDF
+import { jsPDF } from "jspdf"; 
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -252,7 +252,7 @@ const UserProfile = () => {
           h1, h2, h3, h4, h5, h6, .brand-text { font-family: 'Poppins', sans-serif; }
 
           .nav-link-custom { transition: color 0.3s ease; color: #555; }
-          .nav-link-custom:hover { color: #000 !important; }
+          .nav-link-custom:hover { color: #FFB76C !important; }
 
           .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1050; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.3s forwards;}
           .modal-content-small { background-color: #fff; border-radius: 20px; max-width: 400px; width: 100%; padding: 40px 20px; text-align: center; }
@@ -270,7 +270,7 @@ const UserProfile = () => {
           @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
           .profile-sidebar { background: #fff; border-radius: 20px; padding: 30px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
-          .profile-avatar-container { text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 20px; }
+          .profile-sidebar-container { text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 20px; }
           .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #F4F7FE; box-shadow: 0 5px 15px rgba(255, 183, 108, 0.3); margin-bottom: 15px; }
           
           .profile-menu-item { display: flex; align-items: center; gap: 15px; padding: 14px 20px; border-radius: 12px; color: #64748B; font-weight: 600; text-decoration: none; transition: all 0.3s; cursor: pointer; margin-bottom: 8px; border: 1px solid transparent; }
@@ -329,7 +329,20 @@ const UserProfile = () => {
           @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
           .anim-fade-up { animation: fadeInUp 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
 
+          /* CSS Navbar Mobile */
           @media (max-width: 991px) {
+            .nav-actions-mobile {
+              position: absolute;
+              top: 70px;
+              left: 0;
+              right: 0;
+              background: #fff;
+              padding: 20px;
+              flex-direction: column;
+              align-items: flex-start !important;
+              box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+              display: flex !important;
+            }
             .profile-content-card { padding: 25px; margin-top: 20px; }
             .history-card { flex-direction: column; }
             .history-img-container { width: 100%; height: 200px; }
@@ -491,10 +504,10 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* --- NAVBAR --- */}
-      <nav className="navbar py-3 fixed-top" style={{ backgroundColor: '#fff', borderBottom: '1px solid #E5E7EB', zIndex: 999 }}>
+      {/* ✅ NAVBAR DIPERBARUI SESUAI HOME */}
+      <nav className="navbar py-3 fixed-top shadow-sm" style={{ backgroundColor: '#fff', zIndex: 999 }}>
         <div className="container-fluid px-4 px-lg-5 d-flex align-items-center">
-          <Link className="navbar-brand brand-text fs-3" style={{ color: '#111', letterSpacing: '-0.5px' }} to="/">
+          <Link className="navbar-brand brand-text fw-bold fs-3" style={{ color: '#111', letterSpacing: '-0.5px' }} to="/">
             Ampatheia<span style={{ color: '#FFB76C' }}>.</span>
           </Link>
           
@@ -503,13 +516,22 @@ const UserProfile = () => {
           </button>
 
           <div className={`align-items-center gap-4 ms-lg-auto d-lg-flex ${isMobileMenuOpen ? 'nav-actions-mobile' : 'd-none'}`}>
-            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
-            <Link className="text-decoration-none fs-6 fw-medium nav-link-custom" to="/destinasi" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
+            <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/" onClick={() => setIsMobileMenuOpen(false)}>Beranda</Link>
+            <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
+            <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/destinations" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
+            <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
             
-            <div className="d-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill border">
-              <span className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>Halo, <span style={{ color: '#FFB76C' }}>{user.name.split(' ')[0]}</span></span>
-              <img src={`https://ui-avatars.com/api/?name=${user.name}&background=FFB76C&color=000&bold=true`} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
-            </div>
+            {user ? (
+              <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                <div className="d-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill border">
+                  <span className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>Halo, <span style={{ color: '#FFB76C' }}>{user.name?.split(' ')[0] || "User"}</span></span>
+                  <img src={`https://ui-avatars.com/api/?name=${user.name || 'User'}&background=FFB76C&color=000&bold=true`} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
+                </div>
+                <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3">Keluar</button>
+              </div>
+            ) : (
+              <Link className="btn btn-sm btn-dark rounded-pill px-4 mt-3 mt-lg-0" to="/login" onClick={() => setIsMobileMenuOpen(false)}>Masuk</Link>
+            )}
           </div>
         </div>
       </nav>

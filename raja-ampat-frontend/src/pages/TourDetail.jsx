@@ -32,7 +32,7 @@ const TourDetail = () => {
 
     const fetchPackageDetail = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/tour_packages/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tour_packages/${id}`);
         let data = response.data?.data || response.data;
         if (Array.isArray(data)) data = data.length > 0 ? data[0] : null;
         setPkgDetail(data);
@@ -80,7 +80,7 @@ const TourDetail = () => {
   }, [id, pkgDetail]);
 
   // =======================================================
-  // --- PERUBAHAN LOGIKA BOOKING ---
+  // --- LOGIKA BOOKING ---
   // =======================================================
   const handleBooking = () => {
     // 1. Validasi Tanggal
@@ -205,6 +205,9 @@ const TourDetail = () => {
           body { font-family: 'Inter', sans-serif; }
           h1, h2, h3, h4, .brand-text { font-family: 'Poppins', sans-serif; }
           
+          .nav-link-custom { transition: color 0.3s ease; color: #555; }
+          .nav-link-custom:hover { color: #FFB76C !important; }
+
           .gallery-main { position: relative; border-radius: 16px; overflow: hidden; height: 450px; background-color: #E5E7EB; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
           .gallery-main img { width: 100%; height: 100%; object-fit: cover; }
           .gallery-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 2; color: #333; }
@@ -233,107 +236,75 @@ const TourDetail = () => {
           @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
           .anim-fade-up { animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
           
+          .timeline-wrapper{ position: relative; }
+          .timeline-item{ display:flex; gap:32px; margin-bottom:48px; }
+          .timeline-left{ width:52px; display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+          .timeline-circle{ width:52px; height:52px; border-radius:50%; background:#67E8E0; color:#111827; font-weight:700; font-size:1.2rem; display:flex; align-items:center; justify-content:center; }
+          .timeline-line{ width:2px; flex:1; background:#D1D5DB; margin-top:8px; min-height:90px; }
+          .timeline-content{ flex:1; padding-top:4px; }
+          .timeline-title{ font-size:1.7rem; font-weight:700; color:#111827; margin-bottom:12px; }
+          .timeline-desc{ color:#374151; line-height:1.7; font-size:1.1rem; margin:0; white-space:pre-line; }
+
+          /* Mobile Nav Action Styles */
           @media (max-width: 991px) {
             .booking-card { position: relative; top: 0; margin-top: 40px; }
             .gallery-main { height: 250px; }
-          }
-          .timeline-wrapper{
-            position: relative;
-          }
-          .timeline-item{
-            display:flex;
-            gap:32px;
-            margin-bottom:48px;
-          }
-          .timeline-left{
-            width:52px;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            flex-shrink:0;
-          }
-          .timeline-circle{
-            width:52px;
-            height:52px;
-            border-radius:50%;
-            background:#67E8E0;
-            color:#111827;
-            font-weight:700;
-            font-size:1.2rem;
-          
-            display:flex;
-            align-items:center;
-            justify-content:center;
-          }
-          .timeline-line{
-            width:2px;
-            flex:1;
-            background:#D1D5DB;
-            margin-top:8px;
-            min-height:90px;
-          }
-          .timeline-content{
-            flex:1;
-            padding-top:4px;
-          }
-          .timeline-title{
-            font-size:1.7rem;
-            font-weight:700;
-            color:#111827;
-            margin-bottom:12px;
-          }
-          .timeline-desc{
-            color:#374151;
-            line-height:1.7;
-            font-size:1.1rem;
-            margin:0;
-            white-space:pre-line;
+            .nav-actions-mobile {
+              position: absolute;
+              top: 70px;
+              left: 0;
+              right: 0;
+              background: #fff;
+              padding: 20px;
+              flex-direction: column;
+              align-items: flex-start !important;
+              box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+              display: flex !important;
+            }
           }
           
           @media(max-width:768px){
-            .timeline-item{
-              gap:20px;
-            }
-            .timeline-circle{
-              width:42px;
-              height:42px;
-              font-size:1rem;
-            }
-            .timeline-title{
-              font-size:1.2rem;
-            }
-            .timeline-desc{
-              font-size:0.95rem;
-            }
+            .timeline-item{ gap:20px; }
+            .timeline-circle{ width:42px; height:42px; font-size:1rem; }
+            .timeline-title{ font-size:1.2rem; }
+            .timeline-desc{ font-size:0.95rem; }
           }
 
           /*--footer--*/
-          .social-link {
-            transition: all 0.3s ease;
-            color: #000;
-          }
-          .social-link:hover {
-            transform: translateX(5px);
-            color: #ffffff !important;
-          }
-          .social-icon {
-            font-size: 28px;
-          }
+          .social-link { transition: all 0.3s ease; color: #000; }
+          .social-link:hover { transform: translateX(5px); color: #ffffff !important; }
         `}
       </style>
 
-      {/* NAVBAR */}
-      <nav className="navbar py-3 fixed-top" style={{ backgroundColor: '#fff', borderBottom: '1px solid #E5E7EB', zIndex: 999 }}>
+      {/* ✅ NAVBAR DIPERBARUI SESUAI HOME */}
+      <nav className="navbar py-3 fixed-top shadow-sm" style={{ backgroundColor: '#fff', zIndex: 999 }}>
         <div className="container-fluid px-4 px-lg-5 d-flex align-items-center">
-          <Link className="navbar-brand fw-bold fs-3" style={{ color: '#111' }} to="/">
+          <Link className="navbar-brand brand-text fw-bold fs-3" style={{ color: '#111', letterSpacing: '-0.5px' }} to="/">
             Ampatheia<span style={{ color: '#FFB76C' }}>.</span>
           </Link>
-          <div className="ms-auto d-flex align-items-center gap-4">
-            <Link className="text-decoration-none fs-6 fw-medium text-dark" to="/tour-packages">Paket Wisata</Link>
+          
+          <button className="d-lg-none ms-auto" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} style={{ background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#111' }}>
+            {isMobileMenuOpen ? '✕' : '☰'}
+          </button>
+
+          <div className={`align-items-center gap-4 ms-lg-auto d-lg-flex ${isMobileMenuOpen ? 'nav-actions-mobile' : 'd-none'}`}>
+            <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/" onClick={() => setIsMobileMenuOpen(false)}>Beranda</Link>
+            <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
+            <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/destinations" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
+            <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
+            
             {user ? (
-              <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3">Keluar</button>
+              <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                <Link to="/profile" style={{ textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>
+                  <div className="d-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill border">
+                    <span className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>Halo, <span style={{ color: '#FFB76C' }}>{user.name?.split(' ')[0] || "User"}</span></span>
+                    <img src={`https://ui-avatars.com/api/?name=${user.name || 'User'}&background=FFB76C&color=000&bold=true`} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
+                  </div>
+                </Link>
+                <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3">Keluar</button>
+              </div>
             ) : (
-              <Link className="btn btn-sm btn-dark rounded-pill px-4" to="/login">Masuk</Link>
+              <Link className="btn btn-sm btn-dark rounded-pill px-4 mt-3 mt-lg-0" to="/login" onClick={() => setIsMobileMenuOpen(false)}>Masuk</Link>
             )}
           </div>
         </div>
@@ -619,7 +590,7 @@ const TourDetail = () => {
 
                   <li>
                     <Link
-                      to="#"
+                      to="/blog"
                       className="text-dark text-decoration-none nav-link-custom"
                     >
                       Blog

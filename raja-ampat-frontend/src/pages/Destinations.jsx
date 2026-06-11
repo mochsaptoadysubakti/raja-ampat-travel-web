@@ -162,11 +162,12 @@ const Destinations = () => {
             .search-input { margin-bottom: 10px; padding: 5px; text-align: center; }
             .search-btn { width: 100%; }
             .featured-content { padding: 25px; }
+          }
 
-            /*--footer--*/
+          /*--footer--*/
           .social-link {
             transition: all 0.3s ease;
-            color: #000;
+            color: #111 !important; /* ✅ DIPERBAIKI: Memaksa warna jadi hitam pekat */
           }
           .social-link:hover {
             transform: translateX(5px);
@@ -433,7 +434,7 @@ const Destinations = () => {
 
                   <li>
                     <Link
-                      to="#"
+                      to="/blog"
                       className="text-dark text-decoration-none nav-link-custom"
                     >
                       Blog
@@ -484,7 +485,7 @@ const Destinations = () => {
                     href="https://instagram.com/ampatheia.id"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                    className="social-link text-dark text-decoration-none d-flex align-items-center gap-2" /* ✅ DITAMBAHKAN class text-dark */
                   >
                     <FaInstagram size={22} />
                     <span>ampatheia.id</span>
@@ -494,7 +495,7 @@ const Destinations = () => {
                     href="https://facebook.com/ampatheia.id"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                    className="social-link text-dark text-decoration-none d-flex align-items-center gap-2" /* ✅ DITAMBAHKAN class text-dark */
                   >
                     <FaFacebook size={22} />
                     <span>ampatheia.id</span>
@@ -504,7 +505,7 @@ const Destinations = () => {
                     href="https://ampatheia.id"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="social-link text-decoration-none d-flex align-items-center gap-2"
+                    className="social-link text-dark text-decoration-none d-flex align-items-center gap-2" /* ✅ DITAMBAHKAN class text-dark */
                   >
                     <FaGlobe size={22} />
                     <span>ampatheia.id</span>

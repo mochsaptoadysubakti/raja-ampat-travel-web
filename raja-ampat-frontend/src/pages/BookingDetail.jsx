@@ -14,6 +14,7 @@ export default function BookingDetail() {
     // State untuk data API (Otomatis terisi dari halaman sebelumnya jika ada)
     const [pkgDetail, setPkgDetail] = useState(passedState.packageData || null);
     const [user, setUser] = useState(null);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // ✅ STATE UNTUK MENU MOBILE
 
     // State untuk form input 
     const [name, setName] = useState('');
@@ -32,7 +33,7 @@ export default function BookingDetail() {
         // Gunakan URL Sandbox
         const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js"; 
         
-        // ✅ MENGAMBIL CLIENT KEY SECARA DINAMIS (DARI .ENV LOKAL ATAU RAILWAY)
+        // MENGAMBIL CLIENT KEY SECARA DINAMIS
         const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY; 
 
         const script = document.createElement("script");
@@ -127,21 +128,17 @@ export default function BookingDetail() {
                 booking_date: bookingDate,
                 total_people: Number(totalPeople),
                 total_price: grandTotal,
-                // Disinkronkan dengan kebutuhan backend Midtrans
                 customer_name: name,
                 customer_email: email,
-                // Variabel bawaan sebelumnya
                 user_name: name,       
                 user_email: email,     
                 user_phone: phone,     
                 notes: notes           
             };
 
-            // Simpan pesanan ke Database & dapatkan Snap Token dari backend
             const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/bookings`, payload, config);
             const data = response.data;
 
-            // 4️⃣ JIKA DAPAT TOKEN, TAMPILKAN POP-UP MIDTRANS
             if (data.token) {
                 window.snap.pay(data.token, {
                     onSuccess: function (result) {
@@ -149,7 +146,7 @@ export default function BookingDetail() {
                         setShowSuccessPopup(true);
                         setTimeout(() => {
                             setShowSuccessPopup(false);
-                            navigate('/'); // Atau bisa diarahkan ke /riwayat-pesanan
+                            navigate('/profile'); // Diarahkan ke profil riwayat pesanan
                         }, 3000);
                     },
                     onPending: function (result) {
@@ -157,7 +154,7 @@ export default function BookingDetail() {
                         setShowSuccessPopup(true);
                         setTimeout(() => {
                             setShowSuccessPopup(false);
-                            navigate('/'); 
+                            navigate('/profile'); 
                         }, 3000);
                     },
                     onError: function (result) {
@@ -201,7 +198,6 @@ export default function BookingDetail() {
                     .booking-card { background: #fff; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid #F3F4F6; position: sticky; top: 100px; }
                     .summary-img { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
 
-                    /* --- CSS UNTUK POPUP SUKSES --- */
                     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; animation: fadeInModal 0.3s forwards; }
                     .modal-content-success { background-color: #fff; border-radius: 20px; max-width: 400px; width: 100%; padding: 40px 20px; text-align: center; transform: scale(0.9); animation: scaleUpModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
                     .success-icon { width: 70px; height: 70px; background-color: #D1FAE5; color: #10B981; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; margin: 0 auto 20px auto; }
@@ -209,18 +205,29 @@ export default function BookingDetail() {
                     @keyframes fadeInModal { to { opacity: 1; } }
                     @keyframes scaleUpModal { to { transform: scale(1); } }
 
+                    .nav-link-custom { transition: color 0.3s ease; color: #555; }
+                    .nav-link-custom:hover { color: #FFB76C !important; }
+
+                    /* CSS Navbar Mobile */
+                    @media (max-width: 991px) {
+                      .nav-actions-mobile {
+                        position: absolute;
+                        top: 70px;
+                        left: 0;
+                        right: 0;
+                        background: #fff;
+                        padding: 20px;
+                        flex-direction: column;
+                        align-items: flex-start !important;
+                        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+                        display: flex !important;
+                      }
+                    }
+
                     /*--footer--*/
-                    .social-link {
-                        transition: all 0.3s ease;
-                        color: #000;
-                    }
-                    .social-link:hover {
-                        transform: translateX(5px);
-                        color: #ffffff !important;
-                    }
-                    .social-icon {
-                        font-size: 28px;
-                    }
+                    .social-link { transition: all 0.3s ease; color: #000; }
+                    .social-link:hover { transform: translateX(5px); color: #ffffff !important; }
+                    .social-icon { font-size: 28px; }
                 `}
             </style>
 
@@ -232,31 +239,48 @@ export default function BookingDetail() {
                         <h4 className="fw-bold text-dark mb-2">Pesanan Berhasil!</h4>
                         <p className="text-secondary small mb-0">
                             Terima kasih, pesanan Anda telah tersimpan dan sedang diproses. <br/><br/>
-                            <span className="text-muted" style={{ fontSize: '0.8rem' }}>Mengalihkan ke beranda...</span>
+                            <span className="text-muted" style={{ fontSize: '0.8rem' }}>Mengalihkan ke profil Anda...</span>
                         </p>
                     </div>
                 </div>
             )}
 
-            {/* NAVBAR */}
-            <nav className="navbar py-3 shadow-sm" style={{ backgroundColor: '#fff' }}>
-                <div className="container-fluid px-4 px-lg-5 d-flex align-items-center">
-                    <Link className="navbar-brand brand-text fs-3" style={{ color: '#111' }} to="/">
-                        Ampatheia<span style={{ color: '#FFB76C' }}>.</span>
-                    </Link>
-                    <div className="ms-auto d-flex align-items-center gap-4">
-                        <Link className="text-decoration-none fs-6 fw-medium text-dark" to="/tour-packages">Paket Wisata</Link>
-                        {user ? (
-                            <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3">Keluar</button>
-                        ) : (
-                            <Link className="btn btn-sm btn-dark rounded-pill px-4" to="/login">Masuk</Link>
-                        )}
+            {/* ✅ NAVBAR DIPERBARUI SESUAI HOME */}
+            <nav className="navbar py-3 fixed-top shadow-sm" style={{ backgroundColor: '#fff', zIndex: 999 }}>
+              <div className="container-fluid px-4 px-lg-5 d-flex align-items-center">
+                <Link className="navbar-brand brand-text fw-bold fs-3" style={{ color: '#111', letterSpacing: '-0.5px' }} to="/">
+                  Ampatheia<span style={{ color: '#FFB76C' }}>.</span>
+                </Link>
+                
+                <button className="d-lg-none ms-auto" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} style={{ background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#111' }}>
+                  {isMobileMenuOpen ? '✕' : '☰'}
+                </button>
+
+                <div className={`align-items-center gap-4 ms-lg-auto d-lg-flex ${isMobileMenuOpen ? 'nav-actions-mobile' : 'd-none'}`}>
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/" onClick={() => setIsMobileMenuOpen(false)}>Beranda</Link>
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/destinations" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
+                  
+                  {user ? (
+                    <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                      <Link to="/profile" style={{ textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>
+                        <div className="d-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill border">
+                          <span className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>Halo, <span style={{ color: '#FFB76C' }}>{user.name?.split(' ')[0] || "User"}</span></span>
+                          <img src={`https://ui-avatars.com/api/?name=${user.name || 'User'}&background=FFB76C&color=000&bold=true`} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
+                        </div>
+                      </Link>
+                      <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3">Keluar</button>
                     </div>
+                  ) : (
+                    <Link className="btn btn-sm btn-dark rounded-pill px-4 mt-3 mt-lg-0" to="/login" onClick={() => setIsMobileMenuOpen(false)}>Masuk</Link>
+                  )}
                 </div>
+              </div>
             </nav>
 
             {/* MAIN KONTEN */}
-            <div className="container flex-grow-1" style={{ paddingTop: '40px', paddingBottom: '80px' }}>
+            <div className="container flex-grow-1" style={{ paddingTop: '110px', paddingBottom: '80px' }}>
                 <div className="mb-5 border-bottom pb-4">
                     <h2 className="fw-bold text-dark mb-1">Detail Pemesanan Anda</h2>
                     <p className="text-secondary mb-0">Silakan lengkapi data di bawah ini untuk melanjutkan pesanan.</p>
@@ -357,7 +381,6 @@ export default function BookingDetail() {
 
             {/* FOOTER */}
             <div style={{ position: 'relative', marginTop: '50px', width: '100%', overflow: 'hidden' }}>
-                {/* SVG OMBAK (JANGAN DIUBAH) */}
                 <svg
                 viewBox="0 0 1440 120"
                 xmlns="http://www.w3.org/2000/svg"
@@ -374,13 +397,10 @@ export default function BookingDetail() {
                 ></path>
                 </svg>
 
-                {/* KONTEN FOOTER */}
                 <footer className="pt-0 pb-2" style={{ backgroundColor: '#70E6D6' }}>
                 <div className="container py-3">
 
                     <div className="row g-3 text-center justify-content-center">
-
-                    {/* Kolom 1: Ampatheia */}
                     <div className="col-lg-4 px-lg-3">
                         <h4
                         className="fw-bold mb-2 text-dark"
@@ -402,7 +422,6 @@ export default function BookingDetail() {
                         </p>
                     </div>
 
-                    {/* Kolom 2: Tautan */}
                     <div className="col-lg-2 px-lg-3">
                         <h6
                         className="fw-bold mb-2 text-dark"
@@ -435,7 +454,7 @@ export default function BookingDetail() {
 
                         <li>
                             <Link
-                            to="#"
+                            to="/blog"
                             className="text-dark text-decoration-none nav-link-custom"
                             >
                             Blog
@@ -444,7 +463,6 @@ export default function BookingDetail() {
                         </ul>
                     </div>
 
-                    {/* Kolom 3: Hubungi Kami */}
                     <div className="col-lg-3 px-lg-3">
                         <h6
                         className="fw-bold mb-2 text-dark"
@@ -466,7 +484,6 @@ export default function BookingDetail() {
                         </ul>
                     </div>
 
-                    {/* Kolom 4: Ikuti Kami */}
                     <div className="col-lg-3 px-lg-3">
                         <h6
                         className="fw-bold mb-2 text-dark"
@@ -528,6 +545,7 @@ export default function BookingDetail() {
                 </div>
                 </footer>
             </div>
+
         </div>
     );
 }

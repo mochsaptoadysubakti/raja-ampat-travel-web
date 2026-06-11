@@ -11,6 +11,7 @@ export default function BlogDetail() {
     const [relatedBlogs, setRelatedBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // ✅ STATE UNTUK MENU MOBILE
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -26,15 +27,15 @@ export default function BlogDetail() {
             }
         }
 
-const fetchBlogData = async () => {
+        const fetchBlogData = async () => {
             setLoading(true);
             try {
-                // ✅ DIPERBAIKI: Gunakan variabel environment agar bisa diakses di Railway
+                // ✅ Gunakan variabel environment agar bisa diakses di Railway
                 const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs/${id}`);
                 const data = res.data?.data || res.data;
                 setBlog(data);
 
-                // ✅ DIPERBAIKI: Gunakan variabel environment juga untuk artikel terkait
+                // ✅ Gunakan variabel environment juga untuk artikel terkait
                 const allRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/blogs`);
                 const allData = allRes.data?.data || allRes.data || [];
                 const filtered = Array.isArray(allData)
@@ -71,9 +72,12 @@ const fetchBlogData = async () => {
 
     if (loading) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
-            Memuat artikel...
+            <div className="spinner-border" style={{ color: '#FFB76C', width: '3rem', height: '3rem' }} role="status">
+                <span className="visually-hidden">Memuat artikel...</span>
+            </div>
         </div>
     );
+    
     if (!blog) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
             Artikel tidak ditemukan.
@@ -109,42 +113,67 @@ const fetchBlogData = async () => {
                 .related-card-body { padding: 14px 16px 18px; }
                 .related-card-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.95rem; color: #111827; line-height: 1.4; margin: 0; }
 
-                .nav-link-hover { transition: color 0.2s; }
-                .nav-link-hover:hover { color: #FFB76C !important; }
+                .nav-link-custom { transition: color 0.3s ease; color: #555; }
+                .nav-link-custom:hover { color: #FFB76C !important; }
 
                 .social-link { transition: all 0.3s ease; color: #000; }
                 .social-link:hover { transform: translateX(5px); color: #ffffff !important; }
 
                 .category-badge { background-color: #FFB76C; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 0; font-family: 'Inter', sans-serif; letter-spacing: 0.02em; }
+                
+                /* CSS Navbar Mobile */
+                @media (max-width: 991px) {
+                  .nav-actions-mobile {
+                    position: absolute;
+                    top: 70px;
+                    left: 0;
+                    right: 0;
+                    background: #fff;
+                    padding: 20px;
+                    flex-direction: column;
+                    align-items: flex-start !important;
+                    box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+                    display: flex !important;
+                  }
+                }
             `}</style>
 
-            {/* NAVBAR */}
-            <nav className="navbar py-3 shadow-sm" style={{ backgroundColor: '#fff' }}>
-                <div className="container-fluid px-4 px-lg-5 d-flex align-items-center">
-                    <Link className="navbar-brand fw-bold fs-3" style={{ color: '#111', fontFamily: 'Poppins, sans-serif', textDecoration: 'none' }} to="/">
-                        Ampatheia<span style={{ color: '#FFB76C' }}>.</span>
-                    </Link>
-                    <div className="ms-auto d-flex align-items-center gap-4">
-                        <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-hover" to="/">Beranda</Link>
-                        <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-hover" to="/tour-packages">Paket Wisata</Link>
-                        <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-hover" to="/destinations">Destinasi</Link>
-                        <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-hover" to="/blog">Blog</Link>
-                        {user ? (
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="btn btn-sm rounded-pill px-3" style={{ backgroundColor: '#FFB76C', color: '#fff', fontSize: '0.85rem' }}>
-                                    Halo, {user.name || user.nama || "User"}
-                                </span>
-                                <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3">Keluar</button>
-                            </div>
-                        ) : (
-                            <Link className="btn btn-sm btn-dark rounded-pill px-4" to="/login">Masuk</Link>
-                        )}
+            {/* ✅ NAVBAR DIPERBARUI SESUAI HOME */}
+            <nav className="navbar py-3 fixed-top shadow-sm" style={{ backgroundColor: '#fff', zIndex: 999 }}>
+              <div className="container-fluid px-4 px-lg-5 d-flex align-items-center">
+                <Link className="navbar-brand brand-text fw-bold fs-3" style={{ color: '#111', letterSpacing: '-0.5px' }} to="/">
+                  Ampatheia<span style={{ color: '#FFB76C' }}>.</span>
+                </Link>
+                
+                <button className="d-lg-none ms-auto" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} style={{ background: 'transparent', border: 'none', fontSize: '1.8rem', color: '#111' }}>
+                  {isMobileMenuOpen ? '✕' : '☰'}
+                </button>
+
+                <div className={`align-items-center gap-4 ms-lg-auto d-lg-flex ${isMobileMenuOpen ? 'nav-actions-mobile' : 'd-none'}`}>
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/" onClick={() => setIsMobileMenuOpen(false)}>Beranda</Link>
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/tour-packages" onClick={() => setIsMobileMenuOpen(false)}>Paket Wisata</Link>
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/destinations" onClick={() => setIsMobileMenuOpen(false)}>Destinasi</Link>
+                  <Link className="text-decoration-none fs-6 fw-medium text-dark nav-link-custom" to="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
+                  
+                  {user ? (
+                    <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                      <Link to="/profile" style={{ textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>
+                        <div className="d-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill border">
+                          <span className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>Halo, <span style={{ color: '#FFB76C' }}>{user.name?.split(' ')[0] || "User"}</span></span>
+                          <img src={`https://ui-avatars.com/api/?name=${user.name || 'User'}&background=FFB76C&color=000&bold=true`} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
+                        </div>
+                      </Link>
+                      <button onClick={handleLogout} className="btn btn-sm btn-outline-danger rounded-pill px-3">Keluar</button>
                     </div>
+                  ) : (
+                    <Link className="btn btn-sm btn-dark rounded-pill px-4 mt-3 mt-lg-0" to="/login" onClick={() => setIsMobileMenuOpen(false)}>Masuk</Link>
+                  )}
                 </div>
+              </div>
             </nav>
 
             {/* MAIN KONTEN */}
-            <div className="flex-grow-1" style={{ paddingTop: '48px', paddingBottom: '80px' }}>
+            <div className="flex-grow-1" style={{ paddingTop: '110px', paddingBottom: '80px' }}>
                 <div className="container" style={{ maxWidth: '800px' }}>
 
                     {/* GAMBAR HERO */}
@@ -246,9 +275,9 @@ const fetchBlogData = async () => {
                             <div className="col-lg-2 px-lg-3">
                                 <h6 className="fw-bold mb-2 text-dark" style={{ fontFamily: 'Poppins, sans-serif' }}>Tautan</h6>
                                 <ul className="list-unstyled text-dark fw-medium mb-0" style={{ lineHeight: '2', fontSize: '0.9rem' }}>
-                                    <li><Link to="/" className="text-dark text-decoration-none">Beranda</Link></li>
-                                    <li><Link to="/tour-packages" className="text-dark text-decoration-none">Paket Wisata</Link></li>
-                                    <li><Link to="/blog" className="text-dark text-decoration-none">Blog</Link></li>
+                                    <li><Link to="/" className="text-dark text-decoration-none nav-link-custom">Beranda</Link></li>
+                                    <li><Link to="/tour-packages" className="text-dark text-decoration-none nav-link-custom">Paket Wisata</Link></li>
+                                    <li><Link to="/blog" className="text-dark text-decoration-none nav-link-custom">Blog</Link></li>
                                 </ul>
                             </div>
 
