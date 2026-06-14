@@ -371,12 +371,12 @@ const Home = () => {
       <div className="container-fluid px-0 position-relative" style={{ backgroundColor: '#fff', zIndex: 2, paddingBottom: '60px', overflow: 'hidden' }}>
         
         <img 
-          src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/e3458f00-5a71-4e2f-9d68-ef1fdc5c6df6" 
+          src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/9039da00-f654-40d6-8d1d-ed897530e3a4" 
           alt="Perahu Raja Ampat" 
           className="position-absolute start-0 hero-wave-left anim-fade-right"
         />
         <img 
-          src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/058720a5-0eee-4604-b3df-ea48915a2d41" 
+          src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/015a4a50-c581-44f0-9ed2-a6841449fdfb" 
           alt="Pantai Raja Ampat" 
           className="position-absolute end-0 hero-wave-right anim-fade-left d-none d-md-block"
         />
