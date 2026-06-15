@@ -222,7 +222,7 @@ const Login = () => {
         {/* PANEL KIRI: GAMBAR FULL */}
         <div className="image-panel">
           <img 
-            src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/dd9942f4-56e7-4cb7-879d-e684dea76d3b" 
+            src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/6a58e8f5-3bdf-4357-8729-54c2b043f3e1" 
             alt="Raja Ampat Scenery Login" 
           />
         </div>

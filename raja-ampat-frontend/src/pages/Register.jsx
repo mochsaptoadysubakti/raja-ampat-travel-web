@@ -244,7 +244,7 @@ const Register = () => {
         {/* PANEL KIRI: GAMBAR FULL */}
         <div className="image-panel">
           <img 
-            src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/0a9cd51c-199f-4340-8567-32af323669bd" 
+            src="https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/6a58e8f5-3bdf-4357-8729-54c2b043f3e1" 
             alt="Raja Ampat Scenery" 
           />
         </div>
