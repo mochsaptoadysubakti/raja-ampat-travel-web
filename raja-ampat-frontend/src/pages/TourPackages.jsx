@@ -112,7 +112,7 @@ const TourPackages = () => {
 
           /* HERO SECTION PAKET WISATA */
           .packages-hero {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url('https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/4edd24f0-cd5b-4271-a94e-add9f4430f2a');
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url('https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/54d47a6c-d132-4128-a080-e2390bb5f3ef');
             background-size: cover;
             background-position: center;
             padding: 100px 0;
